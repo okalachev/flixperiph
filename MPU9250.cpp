@@ -23,7 +23,7 @@
 * IN THE SOFTWARE.
 */
 
-#include "mpu9250.h"  // NOLINT
+#include "MPU9250.h"  // NOLINT
 #if defined(ARDUINO)
 #include <Arduino.h>
 #include "Wire.h"
