@@ -138,7 +138,7 @@ bool MPU9250::begin() {
     return false;
   }
   /* Set the SRD to 0 by default */
-  if (!ConfigSrd(0)) {
+  if (!setSrd(0)) {
     return false;
   }
   return true;
