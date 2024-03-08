@@ -81,9 +81,9 @@ class MPU9250 {
   MPU9250() {}
   MPU9250(TwoWire *i2c, const I2cAddr addr) :
           imu_(i2c, static_cast<uint8_t>(addr)) {}
-  MPU9250(SPIClass *spi, const uint8_t cs) :
+  MPU9250(SPIClass *spi, const uint8_t cs = -1) :
           imu_(spi, cs) {}
-  MPU9250(SPIClass& spi, const uint8_t cs) :
+  MPU9250(SPIClass& spi, const uint8_t cs = -1) :
           imu_(&spi, cs) {}
   void Config(TwoWire *i2c, const I2cAddr addr);
   void Config(SPIClass *spi, const uint8_t cs);

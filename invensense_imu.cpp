@@ -34,6 +34,9 @@ void InvensenseImu::Config(TwoWire *i2c, const uint8_t addr) {
 void InvensenseImu::Config(SPIClass *spi, const uint8_t cs) {
   spi_ = spi;
   dev_ = cs;
+  if (cs == -1) {
+    dev_ = spi_->pinSS(); // Use default CS pin
+  }
   iface_ = SPI;
 }
 
