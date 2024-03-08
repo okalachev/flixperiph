@@ -25,8 +25,6 @@
 
 #include "invensense_imu.h"  // NOLINT
 
-namespace bfs {
-
 void InvensenseImu::Config(TwoWire *i2c, const uint8_t addr) {
   i2c_ = i2c;
   dev_ = addr;
@@ -147,5 +145,3 @@ bool InvensenseImu::ReadRegisters(const uint8_t reg, const uint8_t count,
     return false;
   }
 }
-
-}  // namespace bfs

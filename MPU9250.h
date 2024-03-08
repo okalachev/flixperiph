@@ -37,9 +37,7 @@
 #endif
 #include "invensense_imu.h"  // NOLINT
 
-namespace bfs {
-
-class Mpu9250 {
+class MPU9250 {
  public:
   /* Sensor and filter settings */
   enum I2cAddr : uint8_t {
@@ -80,27 +78,31 @@ class Mpu9250 {
     WOM_RATE_250HZ = 0x0A,
     WOM_RATE_500HZ = 0x0B
   };
-  Mpu9250() {}
-  Mpu9250(TwoWire *i2c, const I2cAddr addr) :
+  MPU9250() {}
+  MPU9250(TwoWire *i2c, const I2cAddr addr) :
           imu_(i2c, static_cast<uint8_t>(addr)) {}
-  Mpu9250(SPIClass *spi, const uint8_t cs) :
+  MPU9250(SPIClass *spi, const uint8_t cs) :
           imu_(spi, cs) {}
+  MPU9250(SPIClass& spi, const uint8_t cs) :
+          imu_(&spi, cs) {}
   void Config(TwoWire *i2c, const I2cAddr addr);
   void Config(SPIClass *spi, const uint8_t cs);
-  bool Begin();
+  bool begin();
   bool EnableDrdyInt();
   bool DisableDrdyInt();
   bool ConfigAccelRange(const AccelRange range);
   inline AccelRange accel_range() const {return accel_range_;}
   bool ConfigGyroRange(const GyroRange range);
   inline GyroRange gyro_range() const {return gyro_range_;}
-  bool ConfigSrd(const uint8_t srd);
+  bool setSrd(const uint8_t srd);
   inline uint8_t srd() const {return srd_;}
   bool ConfigDlpfBandwidth(const DlpfBandwidth dlpf);
   inline DlpfBandwidth dlpf_bandwidth() const {return dlpf_bandwidth_;}
   bool EnableWom(int16_t threshold_mg, const WomRate wom_rate);
   void Reset();
-  bool Read();
+  bool read();
+  void getAccel(float& x, float& y, float& z);
+  void getGyro(float& x, float& y, float& z);
   inline bool new_imu_data() const {return new_imu_data_;}
   inline float accel_x_mps2() const {return accel_[0];}
   inline float accel_y_mps2() const {return accel_[1];}
@@ -210,7 +212,5 @@ class Mpu9250 {
   bool ReadAk8963Registers(const uint8_t reg, const uint8_t count,
                            uint8_t * const data);
 };
-
-}  // namespace bfs
 
 #endif  // INVENSENSE_IMU_SRC_MPU9250_H_ NOLINT

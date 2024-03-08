@@ -36,8 +36,6 @@
 #include "core/core.h"
 #endif
 
-namespace bfs {
-
 class InvensenseImu {
  public:
   InvensenseImu() {}
@@ -72,7 +70,5 @@ class InvensenseImu {
   /* SPI flag to indicate a read operation */
   static constexpr uint8_t SPI_READ_ = 0x80;
 };
-
-}  // namespace bfs
 
 #endif  // INVENSENSE_IMU_SRC_INVENSENSE_IMU_H_ NOLINT

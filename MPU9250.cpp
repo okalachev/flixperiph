@@ -35,15 +35,13 @@
 #include "core/core.h"
 #endif
 
-namespace bfs {
-
-void Mpu9250::Config(TwoWire *i2c, const I2cAddr addr) {
+void MPU9250::Config(TwoWire *i2c, const I2cAddr addr) {
   imu_.Config(i2c, static_cast<uint8_t>(addr));
 }
-void Mpu9250::Config(SPIClass *spi, const uint8_t cs) {
+void MPU9250::Config(SPIClass *spi, const uint8_t cs) {
   imu_.Config(spi, cs);
 }
-bool Mpu9250::Begin() {
+bool MPU9250::begin() {
   imu_.Begin();
   /* 1 MHz for config */
   spi_clock_ = SPI_CFG_CLOCK_;
@@ -145,7 +143,7 @@ bool Mpu9250::Begin() {
   }
   return true;
 }
-bool Mpu9250::EnableDrdyInt() {
+bool MPU9250::EnableDrdyInt() {
   spi_clock_ = SPI_CFG_CLOCK_;
   if (!WriteRegister(INT_PIN_CFG_, INT_PULSE_50US_)) {
     return false;
@@ -155,14 +153,14 @@ bool Mpu9250::EnableDrdyInt() {
   }
   return true;
 }
-bool Mpu9250::DisableDrdyInt() {
+bool MPU9250::DisableDrdyInt() {
   spi_clock_ = SPI_CFG_CLOCK_;
   if (!WriteRegister(INT_ENABLE_, INT_DISABLE_)) {
     return false;
   }
   return true;
 }
-bool Mpu9250::ConfigAccelRange(const AccelRange range) {
+bool MPU9250::ConfigAccelRange(const AccelRange range) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested range and scale */
   switch (range) {
@@ -199,7 +197,7 @@ bool Mpu9250::ConfigAccelRange(const AccelRange range) {
   accel_scale_ = requested_accel_scale_;
   return true;
 }
-bool Mpu9250::ConfigGyroRange(const GyroRange range) {
+bool MPU9250::ConfigGyroRange(const GyroRange range) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested range and scale */
   switch (range) {
@@ -236,7 +234,7 @@ bool Mpu9250::ConfigGyroRange(const GyroRange range) {
   gyro_scale_ = requested_gyro_scale_;
   return true;
 }
-bool Mpu9250::ConfigSrd(const uint8_t srd) {
+bool MPU9250::setSrd(const uint8_t srd) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Changing the SRD to allow us to set the magnetometer successfully */
   if (!WriteRegister(SMPLRT_DIV_, 19)) {
@@ -275,7 +273,7 @@ bool Mpu9250::ConfigSrd(const uint8_t srd) {
   srd_ = srd;
   return true;
 }
-bool Mpu9250::ConfigDlpfBandwidth(const DlpfBandwidth dlpf) {
+bool MPU9250::ConfigDlpfBandwidth(const DlpfBandwidth dlpf) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested dlpf */
   switch (dlpf) {
@@ -318,7 +316,7 @@ bool Mpu9250::ConfigDlpfBandwidth(const DlpfBandwidth dlpf) {
   dlpf_bandwidth_ = requested_dlpf_;
   return true;
 }
-bool Mpu9250::EnableWom(int16_t threshold_mg, const WomRate wom_rate) {
+bool MPU9250::EnableWom(int16_t threshold_mg, const WomRate wom_rate) {
   /* Check threshold in limits, 4 - 1020 mg */
   if ((threshold_mg < 4) || (threshold_mg > 1020)) {return false;}
   spi_clock_ = SPI_CFG_CLOCK_;
@@ -364,7 +362,7 @@ bool Mpu9250::EnableWom(int16_t threshold_mg, const WomRate wom_rate) {
   }
   return true;
 }
-void Mpu9250::Reset() {
+void MPU9250::Reset() {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Set AK8963 to power down */
   WriteAk8963Register(AK8963_CNTL1_, AK8963_PWR_DOWN_);
@@ -373,7 +371,7 @@ void Mpu9250::Reset() {
   /* Wait for MPU-9250 to come back up */
   delay(1);
 }
-bool Mpu9250::Read() {
+bool MPU9250::read() {
   spi_clock_ = SPI_READ_CLOCK_;
   /* Reset the new data flags */
   new_mag_data_ = false;
@@ -421,14 +419,24 @@ bool Mpu9250::Read() {
   }
   return true;
 }
-bool Mpu9250::WriteRegister(const uint8_t reg, const uint8_t data) {
+void MPU9250::getAccel(float& x, float& y, float& z) {
+  x = accel_[0];
+  y = accel_[1];
+  z = accel_[2];
+}
+void MPU9250::getGyro(float& x, float& y, float& z) {
+  x = gyro_[0];
+  y = gyro_[1];
+  z = gyro_[2];
+}
+bool MPU9250::WriteRegister(const uint8_t reg, const uint8_t data) {
   return imu_.WriteRegister(reg, data, spi_clock_);
 }
-bool Mpu9250::ReadRegisters(const uint8_t reg, const uint8_t count,
+bool MPU9250::ReadRegisters(const uint8_t reg, const uint8_t count,
                             uint8_t * const data) {
   return imu_.ReadRegisters(reg, count, spi_clock_, data);
 }
-bool Mpu9250::WriteAk8963Register(const uint8_t reg, const uint8_t data) {
+bool MPU9250::WriteAk8963Register(const uint8_t reg, const uint8_t data) {
   uint8_t ret_val;
   if (!WriteRegister(I2C_SLV0_ADDR_, AK8963_I2C_ADDR_)) {
     return false;
@@ -451,7 +459,7 @@ bool Mpu9250::WriteAk8963Register(const uint8_t reg, const uint8_t data) {
     return false;
   }
 }
-bool Mpu9250::ReadAk8963Registers(const uint8_t reg, const uint8_t count,
+bool MPU9250::ReadAk8963Registers(const uint8_t reg, const uint8_t count,
                                   uint8_t * const data) {
   if (!WriteRegister(I2C_SLV0_ADDR_, AK8963_I2C_ADDR_ | I2C_READ_FLAG_)) {
     return false;
@@ -465,5 +473,3 @@ bool Mpu9250::ReadAk8963Registers(const uint8_t reg, const uint8_t count,
   delay(1);
   return ReadRegisters(EXT_SENS_DATA_00_, count, data);
 }
-
-}  // namespace bfs
