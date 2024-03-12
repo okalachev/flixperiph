@@ -42,6 +42,7 @@ void InvensenseImu::Config(SPIClass *spi, const uint8_t cs) {
 
 void InvensenseImu::Begin() {
   if (iface_ == SPI) {
+    spi_->begin();
     pinMode(dev_, OUTPUT);
     /* Toggle CS pin to lock in SPI mode */
     digitalWrite(dev_, LOW);
