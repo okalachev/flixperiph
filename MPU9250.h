@@ -101,6 +101,7 @@ class MPU9250 {
   bool EnableWom(int16_t threshold_mg, const WomRate wom_rate);
   void Reset();
   bool read();
+  void waitForData();
   void getAccel(float& x, float& y, float& z);
   void getGyro(float& x, float& y, float& z);
   inline bool new_imu_data() const {return new_imu_data_;}

@@ -419,6 +419,9 @@ bool MPU9250::read() {
   }
   return true;
 }
+void MPU9250::waitForData() {
+  while (!read());
+}
 void MPU9250::getAccel(float& x, float& y, float& z) {
   x = accel_[0];
   y = accel_[1];
