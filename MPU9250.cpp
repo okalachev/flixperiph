@@ -126,15 +126,15 @@ bool MPU9250::begin() {
     return false;
   }
   /* Set the accel range to 16G by default */
-  if (!ConfigAccelRange(ACCEL_RANGE_16G)) {
+  if (!setAccelRange(ACCEL_RANGE_16G)) {
     return false;
   }
   /* Set the gyro range to 2000DPS by default*/
-  if (!ConfigGyroRange(GYRO_RANGE_2000DPS)) {
+  if (!setGyroRange(GYRO_RANGE_2000DPS)) {
     return false;
   }
   /* Set the DLPF to 184HZ by default */
-  if (!ConfigDlpfBandwidth(DLPF_BANDWIDTH_184HZ)) {
+  if (!setDlpfBandwidth(DLPF_BANDWIDTH_184HZ)) {
     return false;
   }
   /* Set the SRD to 0 by default */
@@ -160,7 +160,7 @@ bool MPU9250::DisableDrdyInt() {
   }
   return true;
 }
-bool MPU9250::ConfigAccelRange(const AccelRange range) {
+bool MPU9250::setAccelRange(const AccelRange range) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested range and scale */
   switch (range) {
@@ -197,7 +197,7 @@ bool MPU9250::ConfigAccelRange(const AccelRange range) {
   accel_scale_ = requested_accel_scale_;
   return true;
 }
-bool MPU9250::ConfigGyroRange(const GyroRange range) {
+bool MPU9250::setGyroRange(const GyroRange range) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested range and scale */
   switch (range) {
@@ -273,7 +273,7 @@ bool MPU9250::setSrd(const uint8_t srd) {
   srd_ = srd;
   return true;
 }
-bool MPU9250::ConfigDlpfBandwidth(const DlpfBandwidth dlpf) {
+bool MPU9250::setDlpfBandwidth(const DlpfBandwidth dlpf) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested dlpf */
   switch (dlpf) {

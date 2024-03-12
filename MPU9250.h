@@ -90,13 +90,13 @@ class MPU9250 {
   bool begin();
   bool EnableDrdyInt();
   bool DisableDrdyInt();
-  bool ConfigAccelRange(const AccelRange range);
+  bool setAccelRange(const AccelRange range);
   inline AccelRange accel_range() const {return accel_range_;}
-  bool ConfigGyroRange(const GyroRange range);
+  bool setGyroRange(const GyroRange range);
   inline GyroRange gyro_range() const {return gyro_range_;}
   bool setSrd(const uint8_t srd);
   inline uint8_t srd() const {return srd_;}
-  bool ConfigDlpfBandwidth(const DlpfBandwidth dlpf);
+  bool setDlpfBandwidth(const DlpfBandwidth dlpf);
   inline DlpfBandwidth dlpf_bandwidth() const {return dlpf_bandwidth_;}
   bool EnableWom(int16_t threshold_mg, const WomRate wom_rate);
   void Reset();
