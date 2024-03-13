@@ -35,10 +35,10 @@
 #include "core/core.h"
 #endif
 
-void MPU9250::Config(TwoWire *i2c, const I2cAddr addr) {
+void MPU9250::config(TwoWire *i2c, const I2cAddr addr) {
   imu_.Config(i2c, static_cast<uint8_t>(addr));
 }
-void MPU9250::Config(SPIClass *spi, const uint8_t cs) {
+void MPU9250::config(SPIClass *spi, const uint8_t cs) {
   imu_.Config(spi, cs);
 }
 bool MPU9250::begin() {
@@ -143,7 +143,7 @@ bool MPU9250::begin() {
   }
   return true;
 }
-bool MPU9250::EnableDrdyInt() {
+bool MPU9250::enableDrdyInt() {
   spi_clock_ = SPI_CFG_CLOCK_;
   if (!WriteRegister(INT_PIN_CFG_, INT_PULSE_50US_)) {
     return false;
@@ -153,7 +153,7 @@ bool MPU9250::EnableDrdyInt() {
   }
   return true;
 }
-bool MPU9250::DisableDrdyInt() {
+bool MPU9250::disableDrdyInt() {
   spi_clock_ = SPI_CFG_CLOCK_;
   if (!WriteRegister(INT_ENABLE_, INT_DISABLE_)) {
     return false;
@@ -316,7 +316,7 @@ bool MPU9250::setDlpfBandwidth(const DlpfBandwidth dlpf) {
   dlpf_bandwidth_ = requested_dlpf_;
   return true;
 }
-bool MPU9250::EnableWom(int16_t threshold_mg, const WomRate wom_rate) {
+bool MPU9250::enableWom(int16_t threshold_mg, const WomRate wom_rate) {
   /* Check threshold in limits, 4 - 1020 mg */
   if ((threshold_mg < 4) || (threshold_mg > 1020)) {return false;}
   spi_clock_ = SPI_CFG_CLOCK_;
@@ -362,7 +362,7 @@ bool MPU9250::EnableWom(int16_t threshold_mg, const WomRate wom_rate) {
   }
   return true;
 }
-void MPU9250::Reset() {
+void MPU9250::reset() {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Set AK8963 to power down */
   WriteAk8963Register(AK8963_CNTL1_, AK8963_PWR_DOWN_);

@@ -85,11 +85,11 @@ class MPU9250 {
           imu_(spi, cs) {}
   MPU9250(SPIClass& spi, const uint8_t cs = -1) :
           imu_(&spi, cs) {}
-  void Config(TwoWire *i2c, const I2cAddr addr);
-  void Config(SPIClass *spi, const uint8_t cs);
+  void config(TwoWire *i2c, const I2cAddr addr);
+  void config(SPIClass *spi, const uint8_t cs);
   bool begin();
-  bool EnableDrdyInt();
-  bool DisableDrdyInt();
+  bool enableDrdyInt();
+  bool disableDrdyInt();
   bool setAccelRange(const AccelRange range);
   inline AccelRange accel_range() const {return accel_range_;}
   bool setGyroRange(const GyroRange range);
@@ -98,8 +98,8 @@ class MPU9250 {
   inline uint8_t srd() const {return srd_;}
   bool setDlpfBandwidth(const DlpfBandwidth dlpf);
   inline DlpfBandwidth dlpf_bandwidth() const {return dlpf_bandwidth_;}
-  bool EnableWom(int16_t threshold_mg, const WomRate wom_rate);
-  void Reset();
+  bool enableWom(int16_t threshold_mg, const WomRate wom_rate);
+  void reset();
   bool read();
   void waitForData();
   void getAccel(float& x, float& y, float& z);
