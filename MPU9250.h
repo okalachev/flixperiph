@@ -102,8 +102,8 @@ class MPU9250 {
   void reset();
   bool read();
   void waitForData();
-  void getAccel(float& x, float& y, float& z);
-  void getGyro(float& x, float& y, float& z);
+  void getAccel(float& x, float& y, float& z) const;
+  void getGyro(float& x, float& y, float& z) const;
   inline bool new_imu_data() const {return new_imu_data_;}
   inline float accel_x_mps2() const {return accel_[0];}
   inline float accel_y_mps2() const {return accel_[1];}

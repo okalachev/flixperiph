@@ -422,12 +422,12 @@ bool MPU9250::read() {
 void MPU9250::waitForData() {
   while (!read());
 }
-void MPU9250::getAccel(float& x, float& y, float& z) {
+void MPU9250::getAccel(float& x, float& y, float& z) const {
   x = accel_[0];
   y = accel_[1];
   z = accel_[2];
 }
-void MPU9250::getGyro(float& x, float& y, float& z) {
+void MPU9250::getGyro(float& x, float& y, float& z) const {
   x = gyro_[0];
   y = gyro_[1];
   z = gyro_[2];
