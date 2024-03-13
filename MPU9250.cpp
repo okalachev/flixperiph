@@ -432,6 +432,11 @@ void MPU9250::getGyro(float& x, float& y, float& z) const {
   y = gyro_[1];
   z = gyro_[2];
 }
+void MPU9250::getMag(float& x, float& y, float& z) const {
+  x = mag_[0];
+  y = mag_[1];
+  z = mag_[2];
+}
 bool MPU9250::WriteRegister(const uint8_t reg, const uint8_t data) {
   return imu_.WriteRegister(reg, data, spi_clock_);
 }

@@ -21,9 +21,10 @@ void setup() {
 }
 
 void loop() {
-  float gx, gy, gz, ax, ay, az;
+  float gx, gy, gz, ax, ay, az, mx, my, mz;
   IMU.waitForData(); // blockingly read the data, use IMU.read() for non-blocking read
   IMU.readGyro(gx, gy, gz);
   IMU.readAccel(ax, ay, az);
+  IMU.readMag(mx, my, mz);
 }
 ```
