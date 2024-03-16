@@ -51,13 +51,12 @@ class SBUS {
   SBUS(HardwareSerial& bus, const int8_t rxpin, const int8_t txpin,
          const bool inv, const bool fast) : uart_(&bus), inv_(inv), fast_(fast),
                                             rxpin_(rxpin), txpin_(txpin) {}
-  #else
+  #endif
   explicit SBUS(HardwareSerial& bus) : uart_(&bus) {}
   SBUS(HardwareSerial& bus, const bool inv) : uart_(&bus), inv_(inv) {}
   SBUS(HardwareSerial& bus, const bool inv, const bool fast) : uart_(&bus),
                                                                  inv_(inv),
                                                                  fast_(fast) {}
-  #endif
   void begin();
   bool read();
   inline SBUSData data() const {return data_;}
@@ -68,7 +67,7 @@ class SBUS {
   bool inv_ = true;
   bool fast_ = false;
   #if defined(ESP32)
-  int8_t rxpin_, txpin_;
+  int8_t rxpin_ = -1, txpin_ = -1; // if pin < 0, default for the bus is used
   #endif
   int32_t baud_ = 100000;
   /* Message len */
@@ -105,13 +104,12 @@ class SBUSTx {
   SBUSTx(HardwareSerial& bus, const int8_t rxpin, const int8_t txpin,
          const bool inv, const bool fast) : uart_(&bus), inv_(inv), fast_(fast),
                                             rxpin_(rxpin), txpin_(txpin) {}
-  #else
+  #endif
   explicit SBUSTx(HardwareSerial& bus) : uart_(&bus) {}
   SBUSTx(HardwareSerial& bus, const bool inv) : uart_(&bus), inv_(inv) {}
   SBUSTx(HardwareSerial& bus, const bool inv, const bool fast) : uart_(&bus),
                                                                  inv_(inv),
                                                                  fast_(fast) {}
-  #endif
   void begin();
   void write();
   inline void data(const SBUSData &data) {data_ = data;}
@@ -123,7 +121,7 @@ class SBUSTx {
   bool inv_ = true;
   bool fast_ = false;
   #if defined(ESP32)
-  int8_t rxpin_, txpin_;
+  int8_t rxpin_ = -1, txpin_ = -1; // if pin < 0, default for the bus is used
   #endif
   int32_t baud_ = 100000;
   /* Message len */
