@@ -23,7 +23,7 @@
 * IN THE SOFTWARE.
 */
 
-#include "sbus.h"  // NOLINT
+#include "SBUS.h"  // NOLINT
 #if defined(ARDUINO)
 #include <Arduino.h>
 #else
