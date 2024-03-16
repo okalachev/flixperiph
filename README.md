@@ -4,7 +4,8 @@ This library contains Arduino drivers for the peripherals used in the [Flix dron
 
 Based on:
 
-* [Bolder Flight InvenSense-IMU library](https://github.com/bolderflight/invensense-imu) (version 1.0.2). Original author: Brian Taylor (brian.taylor@bolderflight.com).
+* [Bolder Flight InvenSense-IMU library](https://github.com/bolderflight/invensense-imu). Original author: Brian Taylor (brian.taylor@bolderflight.com).
+* [Bolder Flight SBUS library](https://github.com/bolderflight/sbus). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 
 ## MPU9250 IMU
 
@@ -26,5 +27,28 @@ void loop() {
   IMU.getGyro(gx, gy, gz);
   IMU.getAccel(ax, ay, az);
   IMU.getMag(mx, my, mz);
+}
+```
+
+## SBUS
+
+Example for SBUS receiver, connected to Serial2:
+
+```cpp
+#include <SBUS.h>
+
+SBUS RC(Serial2, true); // Using Serial2, software inversion enabled
+
+void setup() {
+  RC.begin();
+}
+
+void loop() {
+  if (!RC.read()) return;
+  SBUSData data = RC.data();
+  for (int i = 0; i < data.NUM_CH; i++) {
+    Serial.print(data.ch[i]);
+    Serial.print(" ");
+  }
 }
 ```
