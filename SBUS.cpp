@@ -32,9 +32,7 @@
 #include "core/core.h"
 #endif
 
-namespace bfs {
-
-void SbusRx::Begin() {
+void SBUS::begin() {
   if (fast_) {
     baud_ = 200000;
   } else {
@@ -80,7 +78,7 @@ void SbusRx::Begin() {
   uart_->flush();
 }
 
-bool SbusRx::Read() {
+bool SBUS::read() {
   /* Read through all available packets to get the newest */
   new_data_ = false;
   do {
@@ -91,7 +89,7 @@ bool SbusRx::Read() {
   return new_data_;
 }
 
-bool SbusRx::Parse() {
+bool SBUS::Parse() {
   /* Parse messages */
   while (uart_->available()) {
     cur_byte_ = uart_->read();
@@ -184,7 +182,7 @@ namespace {
 }  // namespace
 #endif
 
-void SbusTx::Begin() {
+void SBUSTx::begin() {
   if (fast_) {
     baud_ = 200000;
   } else {
@@ -229,7 +227,7 @@ void SbusTx::Begin() {
   #endif
 }
 
-void SbusTx::Write() {
+void SBUSTx::write() {
   /* Assemble packet */
   buf_[0] = HEADER_;
   buf_[1] = static_cast<uint8_t>((data_.ch[0] & 0x07FF));
@@ -287,5 +285,3 @@ void SbusTx::Write() {
   uart_->write(buf_, sizeof(buf_));
   #endif
 }
-
-}  // namespace bfs

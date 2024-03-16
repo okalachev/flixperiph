@@ -34,9 +34,7 @@
 #include "core/core.h"
 #endif
 
-namespace bfs {
-
-struct SbusData {
+struct SBUSData {
   bool lost_frame;
   bool failsafe;
   bool ch17, ch18;
@@ -44,25 +42,25 @@ struct SbusData {
   int16_t ch[NUM_CH];
 };
 
-class SbusRx {
+class SBUS {
  public:
   #if defined(ESP32)
-  SbusRx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+  SBUS(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
-  SbusRx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+  SBUS(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv, const bool fast) : uart_(bus), inv_(inv), fast_(fast),
                                             rxpin_(rxpin), txpin_(txpin) {}
   #else
-  explicit SbusRx(HardwareSerial *bus) : uart_(bus) {}
-  SbusRx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
-  SbusRx(HardwareSerial *bus, const bool inv, const bool fast) : uart_(bus),
+  explicit SBUS(HardwareSerial *bus) : uart_(bus) {}
+  SBUS(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
+  SBUS(HardwareSerial *bus, const bool inv, const bool fast) : uart_(bus),
                                                                  inv_(inv),
                                                                  fast_(fast) {}
   #endif
-  void Begin();
-  bool Read();
-  inline SbusData data() const {return data_;}
+  void begin();
+  bool read();
+  inline SBUSData data() const {return data_;}
 
  private:
   /* Communication */
@@ -94,30 +92,30 @@ class SbusRx {
   uint8_t buf_[25];
   /* Data */
   bool new_data_;
-  SbusData data_;
+  SBUSData data_;
   bool Parse();
 };
 
-class SbusTx {
+class SBUSTx {
  public:
   #if defined(ESP32)
-  SbusTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+  SBUSTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv) : uart_(bus), inv_(inv), rxpin_(rxpin), txpin_(txpin)
          {}
-  SbusTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
+  SBUSTx(HardwareSerial *bus, const int8_t rxpin, const int8_t txpin,
          const bool inv, const bool fast) : uart_(bus), inv_(inv), fast_(fast),
                                             rxpin_(rxpin), txpin_(txpin) {}
   #else
-  explicit SbusTx(HardwareSerial *bus) : uart_(bus) {}
-  SbusTx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
-  SbusTx(HardwareSerial *bus, const bool inv, const bool fast) : uart_(bus),
+  explicit SBUSTx(HardwareSerial *bus) : uart_(bus) {}
+  SBUSTx(HardwareSerial *bus, const bool inv) : uart_(bus), inv_(inv) {}
+  SBUSTx(HardwareSerial *bus, const bool inv, const bool fast) : uart_(bus),
                                                                  inv_(inv),
                                                                  fast_(fast) {}
   #endif
-  void Begin();
-  void Write();
-  inline void data(const SbusData &data) {data_ = data;}
-  inline SbusData data() const {return data_;}
+  void begin();
+  void write();
+  inline void data(const SBUSData &data) {data_ = data;}
+  inline SBUSData data() const {return data_;}
 
  private:
   /* Communication */
@@ -141,9 +139,7 @@ class SbusTx {
   static constexpr uint8_t FAILSAFE_MASK_ = 0x08;
   /* Data */
   uint8_t buf_[BUF_LEN_];
-  SbusData data_;
+  SBUSData data_;
 };
-
-}  // namespace bfs
 
 #endif  // SRC_SBUS_H_
