@@ -34,15 +34,15 @@ void InvensenseImu::Config(TwoWire *i2c, const uint8_t addr) {
 void InvensenseImu::Config(SPIClass *spi, const uint8_t cs) {
   spi_ = spi;
   dev_ = cs;
-  if (cs == -1) {
-    dev_ = spi_->pinSS(); // Use default CS pin
-  }
   iface_ = SPI;
 }
 
 void InvensenseImu::Begin() {
   if (iface_ == SPI) {
     spi_->begin();
+    if (dev_ == 255) {
+      dev_ = spi_->pinSS(); // use default SS pin
+    }
     pinMode(dev_, OUTPUT);
     /* Toggle CS pin to lock in SPI mode */
     digitalWrite(dev_, LOW);
