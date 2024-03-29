@@ -27,6 +27,7 @@ void loop() {
   IMU.getGyro(gx, gy, gz);
   IMU.getAccel(ax, ay, az);
   IMU.getMag(mx, my, mz);
+  // Process the data...
 }
 ```
 
@@ -40,6 +41,7 @@ Example for SBUS receiver, connected to Serial2:
 SBUS RC(Serial2, true); // Using Serial2, software inversion enabled
 
 void setup() {
+  Serial.begin(115200);
   RC.begin();
 }
 
