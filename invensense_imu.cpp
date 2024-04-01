@@ -41,7 +41,12 @@ void InvensenseImu::Begin() {
   if (iface_ == SPI) {
     spi_->begin();
     if (dev_ == 255) {
-      dev_ = spi_->pinSS(); // use default SS pin
+      // use default SS pin
+      #ifdef ESP32
+        dev_ = spi_->pinSS();
+      #else
+        dev_ = SS;
+      #endif
     }
     pinMode(dev_, OUTPUT);
     /* Toggle CS pin to lock in SPI mode */
