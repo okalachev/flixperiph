@@ -36,8 +36,9 @@
 #include "core/core.h"
 #endif
 #include "invensense_imu.h"  // NOLINT
+#include "logger.h"
 
-class MPU9250 {
+class MPU9250 : public Logger {
  public:
   /* Sensor and filter settings */
   enum I2cAddr : uint8_t {

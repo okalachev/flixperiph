@@ -65,6 +65,28 @@ Connecting MPU-92.65 board to ESP32 using VSPI:
 * AD0 (MISO) → IO19
 * NCS → IO5
 
+### Logging
+
+By default, the library logs some of the errors to the serial output. On ESP32, the default serial port is determined by the Core Debug Output mechanism, thus can be changed using `setDebugOutput` method:
+
+```cpp
+Serial2.setDebugOutput(true); // all the debug output will now be sent to Serial2
+```
+
+On platforms other than ESP32, the default output port is *Serial*. On all platforms the debug output can be changed using `setLogStream` method:
+
+```cpp
+IMU.setLogStream(Serial2);
+```
+
+
+
+The debug output can be disabled using `setVerbosity` method:
+
+```cpp
+IMU.setVerbosity(false); // disable debug output
+```
+
 ## SBUS
 
 Example for SBUS receiver, connected to Serial2:
