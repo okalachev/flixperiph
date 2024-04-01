@@ -45,6 +45,26 @@ Notice, that MPU6500 does not include a magnetometer, so magnetometer data will 
 
 You can also use `<MPU6500.h>` header and `MPU6500` class, which is an alias for `MPU9250` class.
 
+### Connection
+
+Connecting GY-91 board to ESP32 using VSPI:
+
+* 3V3 → 3V3
+* GND → GND
+* SCL → IO18
+* SDA (MOSI) → IO23
+* SAO (MISO) → IO19
+* NCS → IO5
+
+Connecting MPU-92.65 board to ESP32 using VSPI:
+
+* VCC → 3V3
+* GND → GND
+* SCL → IO18
+* SDA (MOSI) → IO23
+* AD0 (MISO) → IO19
+* NCS → IO5
+
 ## SBUS
 
 Example for SBUS receiver, connected to Serial2:
@@ -68,3 +88,11 @@ void loop() {
   }
 }
 ```
+
+### Connection
+
+Connecting SBUS receiver to ESP32:
+
+* VIN → 3V3
+* GND → GND
+* SIGNAL → IO16 (RX2)
