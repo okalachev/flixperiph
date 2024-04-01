@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Arduino CLI
+      uses: arduino/setup-arduino-cli@v1.1.1
+    - name: Install arduino-cli.yaml
+      run: cp .github/workflows/fixtures/arduino-cli.yaml ./
+    - name: Install ESP32 core
+      run: arduino-cli core update-index --config-file arduino-cli.yaml && arduino-cli core install esp32:esp32
+    - name: Install ESP8266 core
+      run: arduino-cli core update-index --config-file arduino-cli.yaml && arduino-cli core install esp8266:esp8266 --config-file arduino-cli.yaml
+    - name: Install AVR core
+      run: arduino-cli core install arduino:avr
+    - name: Zip and install library
+      run: cd .. && zip -r FlixPeriph.zip . -x .git/\*
+    - name: Install library
+      run: arduino-cli lib install --zip-path ../FlixPeriph.zip --config-file arduino-cli.yaml
+    - name: Build MPU9250 example for ESP32
+      run: cd examples/MPU9250 && arduino-cli compile --fqbn esp32:esp32:esp32
+    - name: Build MPU9250 example for ESP32 D1 Mini
+      run: cd examples/MPU9250 && arduino-cli compile --fqbn esp32:esp32:d1_mini32
+    - name: Build MPU9250 example for ESP8266
+      run: cd examples/MPU9250 && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
+    - name: Build MPU9250 example for Arduino Nano
+      run: cd examples/MPU9250 && arduino-cli compile --fqbn arduino:avr:nano
+    - name: Build SBUS example for ESP32
+      run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:esp32
+    - name: Build SBUS example for ESP32 D1 Mini
+      run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:d1_mini32
