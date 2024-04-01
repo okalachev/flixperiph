@@ -117,6 +117,7 @@ class MPU9250 {
   inline float mag_y_ut() const {return mag_[1];}
   inline float mag_z_ut() const {return mag_[2];}
   inline float die_temp_c() const {return temp_;}
+  inline bool isMPU6500() const {return is_mpu6500_;}
 
  private:
   InvensenseImu imu_;
@@ -139,6 +140,7 @@ class MPU9250 {
   uint8_t asa_buff_[3];
   float mag_scale_[3];
   uint8_t who_am_i_;
+  static constexpr uint8_t WHOAMI_MPU6500_ = 0x70;
   static constexpr uint8_t WHOAMI_MPU9250_ = 0x71;
   static constexpr uint8_t WHOAMI_MPU9255_ = 0x73;
   static constexpr uint8_t WHOAMI_AK8963_ = 0x48;
@@ -146,6 +148,7 @@ class MPU9250 {
   static constexpr float G_MPS2_ = 9.80665f;
   static constexpr float DEG2RAD_ = 3.14159265358979323846264338327950288f /
                                     180.0f;
+  bool is_mpu6500_ = false;
   bool new_imu_data_, new_mag_data_;
   bool mag_sensor_overflow_;
   uint8_t mag_data_[8];

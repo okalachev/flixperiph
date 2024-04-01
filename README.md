@@ -7,7 +7,7 @@ Based on:
 * [Bolder Flight InvenSense-IMU library](https://github.com/bolderflight/invensense-imu). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 * [Bolder Flight SBUS library](https://github.com/bolderflight/sbus). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 
-## MPU9250 IMU
+## MPU9250/MPU6500 IMU
 
 Example for SPI-connected IMU:
 
@@ -30,6 +30,20 @@ void loop() {
   // Process the data...
 }
 ```
+
+The library will detect IMU type (MPU9250 or MPU6500) automatically. You can use the following method to check the detected type:
+
+```cpp
+if (IMU.isMPU6500()) {
+  // MPU6500 detected
+} else {
+  // MPU9250 detected
+}
+```
+
+Notice, that MPU6500 does not include a magnetometer, so magnetometer data will be always zero.
+
+You can also use `<MPU6500.h>` header and `MPU6500` class, which is an alias for `MPU9250` class.
 
 ## SBUS
 

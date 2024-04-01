@@ -57,23 +57,26 @@ bool MPU9250::begin() {
   if (!WriteRegister(I2C_MST_CTRL_, I2C_MST_CLK_)) {
     return false;
   }
-  /* Set AK8963 to power down */
-  WriteAk8963Register(AK8963_CNTL1_, AK8963_PWR_DOWN_);
   /* Reset the MPU9250 */
   WriteRegister(PWR_MGMNT_1_, H_RESET_);
   /* Wait for MPU-9250 to come back up */
   delay(1);
-  /* Reset the AK8963 */
-  WriteAk8963Register(AK8963_CNTL2_, AK8963_RESET_);
-  /* Select clock source to gyro */
-  if (!WriteRegister(PWR_MGMNT_1_, CLKSEL_PLL_)) {
-    return false;
-  }
   /* Check the WHO AM I byte */
   if (!ReadRegisters(WHOAMI_, sizeof(who_am_i_), &who_am_i_)) {
     return false;
   }
-  if ((who_am_i_ != WHOAMI_MPU9250_) && (who_am_i_ != WHOAMI_MPU9255_)) {
+  if (who_am_i_ == WHOAMI_MPU6500_) {
+    // disable AK8963 functions
+    is_mpu6500_ = true;
+  } else if ((who_am_i_ != WHOAMI_MPU9250_) && (who_am_i_ != WHOAMI_MPU9255_)) {
+    return false;
+  }
+  /* Set AK8963 to power down */
+  WriteAk8963Register(AK8963_CNTL1_, AK8963_PWR_DOWN_);
+  /* Reset the AK8963 */
+  WriteAk8963Register(AK8963_CNTL2_, AK8963_RESET_);
+  /* Select clock source to gyro */
+  if (!WriteRegister(PWR_MGMNT_1_, CLKSEL_PLL_)) {
     return false;
   }
   /* Enable I2C master mode */
@@ -88,7 +91,7 @@ bool MPU9250::begin() {
   if (!ReadAk8963Registers(AK8963_WHOAMI_, sizeof(who_am_i_), &who_am_i_)) {
     return false;
   }
-  if (who_am_i_ != WHOAMI_AK8963_) {
+  if (!is_mpu6500_ && who_am_i_ != WHOAMI_AK8963_) {
     return false;
   }
   /* Get the magnetometer calibration */
@@ -393,14 +396,16 @@ bool MPU9250::read() {
   gyro_cnts_[0] =  static_cast<int16_t>(data_buf_[9])  << 8 | data_buf_[10];
   gyro_cnts_[1] =  static_cast<int16_t>(data_buf_[11]) << 8 | data_buf_[12];
   gyro_cnts_[2] =  static_cast<int16_t>(data_buf_[13]) << 8 | data_buf_[14];
-  new_mag_data_ = (data_buf_[15] & AK8963_DATA_RDY_INT_);
-  mag_cnts_[0] =   static_cast<int16_t>(data_buf_[17]) << 8 | data_buf_[16];
-  mag_cnts_[1] =   static_cast<int16_t>(data_buf_[19]) << 8 | data_buf_[18];
-  mag_cnts_[2] =   static_cast<int16_t>(data_buf_[21]) << 8 | data_buf_[20];
-  /* Check for mag overflow */
-  mag_sensor_overflow_ = (data_buf_[22] & AK8963_HOFL_);
-  if (mag_sensor_overflow_) {
-    new_mag_data_ = false;
+  if (!is_mpu6500_) {
+    new_mag_data_ = (data_buf_[15] & AK8963_DATA_RDY_INT_);
+    mag_cnts_[0] =   static_cast<int16_t>(data_buf_[17]) << 8 | data_buf_[16];
+    mag_cnts_[1] =   static_cast<int16_t>(data_buf_[19]) << 8 | data_buf_[18];
+    mag_cnts_[2] =   static_cast<int16_t>(data_buf_[21]) << 8 | data_buf_[20];
+    /* Check for mag overflow */
+    mag_sensor_overflow_ = (data_buf_[22] & AK8963_HOFL_);
+    if (mag_sensor_overflow_) {
+      new_mag_data_ = false;
+    }
   }
   /* Convert to float values and rotate the accel / gyro axis */
   accel_[0] = static_cast<float>(accel_cnts_[1]) * accel_scale_ * G_MPS2_;
@@ -445,6 +450,8 @@ bool MPU9250::ReadRegisters(const uint8_t reg, const uint8_t count,
   return imu_.ReadRegisters(reg, count, spi_clock_, data);
 }
 bool MPU9250::WriteAk8963Register(const uint8_t reg, const uint8_t data) {
+  if (is_mpu6500_) return true;
+
   uint8_t ret_val;
   if (!WriteRegister(I2C_SLV0_ADDR_, AK8963_I2C_ADDR_)) {
     return false;
@@ -469,6 +476,8 @@ bool MPU9250::WriteAk8963Register(const uint8_t reg, const uint8_t data) {
 }
 bool MPU9250::ReadAk8963Registers(const uint8_t reg, const uint8_t count,
                                   uint8_t * const data) {
+  if (is_mpu6500_) return true;
+
   if (!WriteRegister(I2C_SLV0_ADDR_, AK8963_I2C_ADDR_ | I2C_READ_FLAG_)) {
     return false;
   }
