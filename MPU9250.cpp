@@ -74,9 +74,11 @@ bool MPU9250::begin() {
   if (who_am_i_ == WHOAMI_MPU6500_) {
     // disable AK8963 functions
     is_mpu6500_ = true;
-    log("MPU6500 detected");
-  } else if ((who_am_i_ == WHOAMI_MPU9250_) || (who_am_i_ == WHOAMI_MPU9255_)) {
-    log("MPU9250 detected");
+    log("MPU-6500 detected");
+  } else if (who_am_i_ == WHOAMI_MPU9250_) {
+    log("MPU-9250 detected");
+  } else if (who_am_i_ == WHOAMI_MPU9255_) {
+    log("MPU-9255 detected");
   } else {
     log("Unknown WHO_AM_I: 0x%02X", who_am_i_);
     return false;
