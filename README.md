@@ -73,13 +73,11 @@ By default, the library logs some of the errors to the serial output. On ESP32, 
 Serial2.setDebugOutput(true); // all the debug output will now be sent to Serial2
 ```
 
-On platforms other than ESP32, the default output port is *Serial*. On all platforms the debug output can be changed using `setLogStream` method:
+On platforms other than ESP32, the default output port is *Serial*. On all platforms the debug output can be changed using `setLogOutput` method:
 
 ```cpp
-IMU.setLogStream(Serial2);
+IMU.setLogOutput(Serial2);
 ```
-
-
 
 The debug output can be disabled using `setVerbosity` method:
 

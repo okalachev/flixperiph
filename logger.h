@@ -20,7 +20,7 @@ public:
     print("\n");
   }
 
-  inline void setLogStream(Print& output) { logOutput = &output; }
+  inline void setLogOutput(Print& output) { logOutput = &output; }
   inline void setVerbosity(const bool _verbose) { verbose = _verbose; }
 
 protected:
