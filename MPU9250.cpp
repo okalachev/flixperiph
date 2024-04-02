@@ -78,7 +78,7 @@ bool MPU9250::begin() {
   } else if ((who_am_i_ == WHOAMI_MPU9250_) || (who_am_i_ == WHOAMI_MPU9255_)) {
     log("MPU9250 detected");
   } else {
-    log("Unknown WHOAMI: 0x%02X", who_am_i_);
+    log("Unknown WHO_AM_I: 0x%02X", who_am_i_);
     return false;
   }
   /* Set AK8963 to power down */
@@ -106,7 +106,7 @@ bool MPU9250::begin() {
     return false;
   }
   if (!is_mpu6500_ && who_am_i_ != WHOAMI_AK8963_) {
-    log("Wrong AK8963 WHOAMI: 0x%02X", who_am_i_);
+    log("Wrong AK8963 WHO_AM_I: 0x%02X", who_am_i_);
     return false;
   }
   /* Get the magnetometer calibration */
