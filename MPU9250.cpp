@@ -416,6 +416,8 @@ bool MPU9250::read() {
   new_imu_data_ = (data_buf_[0] & RAW_DATA_RDY_INT_);
   if (!new_imu_data_) {
     return false;
+  } else {
+    last_read_us_ = micros();
   }
   /* Unpack the buffer */
   accel_cnts_[0] = static_cast<int16_t>(data_buf_[1])  << 8 | data_buf_[2];
@@ -454,6 +456,11 @@ bool MPU9250::read() {
   return true;
 }
 void MPU9250::waitForData() {
+  int period_us = 1000 * (srd_ + 1);
+  int time_to_wait = period_us * 80 / 100 - (micros() - last_read_us_); // wait the rest of the period * 80%
+  if (time_to_wait > 0) {
+    delayMicroseconds(time_to_wait);
+  }
   while (!read());
 }
 void MPU9250::getAccel(float& x, float& y, float& z) const {

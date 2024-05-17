@@ -157,6 +157,7 @@ class MPU9250 : public Logger {
   int16_t accel_cnts_[3], gyro_cnts_[3], temp_cnts_, mag_cnts_[3];
   float accel_[3], gyro_[3], mag_[3];
   float temp_;
+  unsigned long last_read_us_;
   /* Registers */
   static constexpr uint8_t PWR_MGMNT_1_ = 0x6B;
   static constexpr uint8_t H_RESET_ = 0x80;
