@@ -106,6 +106,7 @@ class MPU9250 : public Logger {
   void getAccel(float& x, float& y, float& z) const;
   void getGyro(float& x, float& y, float& z) const;
   void getMag(float& x, float& y, float& z) const;
+  const char* getType() const;
   inline bool new_imu_data() const {return new_imu_data_;}
   inline float accel_x_mps2() const {return accel_[0];}
   inline float accel_y_mps2() const {return accel_[1];}
@@ -118,7 +119,7 @@ class MPU9250 : public Logger {
   inline float mag_y_ut() const {return mag_[1];}
   inline float mag_z_ut() const {return mag_[2];}
   inline float die_temp_c() const {return temp_;}
-  inline bool isMPU6500() const {return is_mpu6500_;}
+  inline uint8_t whoAmI() const {return who_am_i_;}
 
  private:
   InvensenseImu imu_;
@@ -140,7 +141,7 @@ class MPU9250 : public Logger {
   static constexpr float TEMP_SCALE_ = 333.87f;
   uint8_t asa_buff_[3];
   float mag_scale_[3];
-  uint8_t who_am_i_;
+  uint8_t who_am_i_, who_am_i_ak8963_;
   static constexpr uint8_t WHOAMI_MPU6500_ = 0x70;
   static constexpr uint8_t WHOAMI_MPU9250_ = 0x71;
   static constexpr uint8_t WHOAMI_MPU9255_ = 0x73;

@@ -103,12 +103,12 @@ bool MPU9250::begin() {
     return false;
   }
   /* Check the AK8963 WHOAMI */
-  if (!ReadAk8963Registers(AK8963_WHOAMI_, sizeof(who_am_i_), &who_am_i_)) {
+  if (!ReadAk8963Registers(AK8963_WHOAMI_, sizeof(who_am_i_ak8963_), &who_am_i_ak8963_)) {
     log(errorFmt, 8);
     return false;
   }
-  if (!is_mpu6500_ && who_am_i_ != WHOAMI_AK8963_) {
-    log("Wrong AK8963 WHO_AM_I: 0x%02X", who_am_i_);
+  if (!is_mpu6500_ && who_am_i_ak8963_ != WHOAMI_AK8963_) {
+    log("Wrong AK8963 WHO_AM_I: 0x%02X", who_am_i_ak8963_);
     return false;
   }
   /* Get the magnetometer calibration */
@@ -470,6 +470,14 @@ void MPU9250::getMag(float& x, float& y, float& z) const {
   x = mag_[0];
   y = mag_[1];
   z = mag_[2];
+}
+const char* MPU9250::getType() const {
+  switch (who_am_i_) {
+    case WHOAMI_MPU6500_: return "MPU-6500";
+    case WHOAMI_MPU9250_: return "MPU-9250";
+    case WHOAMI_MPU9255_: return "MPU-9255";
+    default: return "UNKNOWN";
+  }
 }
 bool MPU9250::WriteRegister(const uint8_t reg, const uint8_t data) {
   return imu_.WriteRegister(reg, data, spi_clock_);
