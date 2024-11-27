@@ -1,8 +1,9 @@
 #include <SBUS.h>
 
-SBUS RC(Serial2, true); // Using Serial2, software inversion enabled
+SBUS RC(Serial2); // Using signal pin 4, software inversion enabled
 
 void setup() {
+  Serial.begin(115200);
   RC.begin();
 }
 
@@ -13,4 +14,5 @@ void loop() {
     Serial.print(data.ch[i]);
     Serial.print(" ");
   }
+  Serial.println();
 }
