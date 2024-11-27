@@ -7,8 +7,10 @@ void setup() {
   Serial.begin(115200);
   bool success = IMU.begin();
   if (!success) {
-    Serial.println("Failed to initialize IMU");
-    while (1) {}
+    while (1) {
+      Serial.println("Failed to initialize IMU");
+      delay(1000);
+    }
   }
 }
 
