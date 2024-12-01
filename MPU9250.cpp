@@ -471,7 +471,12 @@ void MPU9250::getMag(float& x, float& y, float& z) const {
   y = mag_[1];
   z = mag_[2];
 }
-const char* MPU9250::getType() const {
+bool MPU9250::setRate(Rate rate) {
+  // TODO:
+  log("Rate setting is not implemented");
+  return false;
+}
+const char* MPU9250::getModel() const {
   switch (who_am_i_) {
     case WHOAMI_MPU6500_: return "MPU-6500";
     case WHOAMI_MPU9250_: return "MPU-9250";
