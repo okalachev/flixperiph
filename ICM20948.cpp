@@ -209,6 +209,7 @@ bool ICM20948::setDLPF(const DLPF dlpf) {
 	}
 	setAccDLPF(val);
 	setGyrDLPF(val);
+	return true;
 }
 
 void ICM20948::setI2CMstSampleRate(uint8_t rateExp) {
