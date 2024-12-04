@@ -35,10 +35,11 @@
 #include <cstdint>
 #include "core/core.h"
 #endif
+#include "IMU.h"
 #include "invensense_imu.h"  // NOLINT
 #include "logger.h"
 
-class MPU9250 : public Logger {
+class MPU9250 : public IMUInterface, public Logger {
  public:
   /* Sensor and filter settings */
   enum I2cAddr : uint8_t {
@@ -52,18 +53,6 @@ class MPU9250 : public Logger {
     DLPF_BANDWIDTH_20HZ = 0x04,
     DLPF_BANDWIDTH_10HZ = 0x05,
     DLPF_BANDWIDTH_5HZ = 0x06
-  };
-  enum AccelRange : int8_t {
-    ACCEL_RANGE_2G = 0x00,
-    ACCEL_RANGE_4G = 0x08,
-    ACCEL_RANGE_8G = 0x10,
-    ACCEL_RANGE_16G = 0x18
-  };
-  enum GyroRange : int8_t {
-    GYRO_RANGE_250DPS = 0x00,
-    GYRO_RANGE_500DPS = 0x08,
-    GYRO_RANGE_1000DPS = 0x10,
-    GYRO_RANGE_2000DPS = 0x18
   };
   enum WomRate : int8_t {
     WOM_RATE_0_24HZ = 0x00,
@@ -88,7 +77,7 @@ class MPU9250 : public Logger {
           imu_(&spi, cs) {}
   void config(TwoWire *i2c, const I2cAddr addr);
   void config(SPIClass *spi, const uint8_t cs);
-  bool begin();
+  bool begin() override;
   bool enableDrdyInt();
   bool disableDrdyInt();
   bool setAccelRange(const AccelRange range);
@@ -97,29 +86,22 @@ class MPU9250 : public Logger {
   inline GyroRange gyro_range() const {return gyro_range_;}
   bool setSrd(const uint8_t srd);
   inline uint8_t srd() const {return srd_;}
+  bool setDLPF(const DLPF dlpf) override;
   bool setDlpfBandwidth(const DlpfBandwidth dlpf);
   inline DlpfBandwidth dlpf_bandwidth() const {return dlpf_bandwidth_;}
   bool enableWom(int16_t threshold_mg, const WomRate wom_rate);
-  void reset();
-  bool read();
-  void waitForData();
-  void getAccel(float& x, float& y, float& z) const;
-  void getGyro(float& x, float& y, float& z) const;
-  void getMag(float& x, float& y, float& z) const;
-  const char* getType() const;
+  void reset() override;
+  bool read() override;
+  void waitForData() override;
+  void getAccel(float& x, float& y, float& z) const override;
+  void getGyro(float& x, float& y, float& z) const override;
+  void getMag(float& x, float& y, float& z) const override;
+  bool setRate(const Rate rate) override;
+  const char* getModel() const override;
   inline bool new_imu_data() const {return new_imu_data_;}
-  inline float accel_x_mps2() const {return accel_[0];}
-  inline float accel_y_mps2() const {return accel_[1];}
-  inline float accel_z_mps2() const {return accel_[2];}
-  inline float gyro_x_radps() const {return gyro_[0];}
-  inline float gyro_y_radps() const {return gyro_[1];}
-  inline float gyro_z_radps() const {return gyro_[2];}
   inline bool new_mag_data() const {return new_mag_data_;}
-  inline float mag_x_ut() const {return mag_[0];}
-  inline float mag_y_ut() const {return mag_[1];}
-  inline float mag_z_ut() const {return mag_[2];}
-  inline float die_temp_c() const {return temp_;}
-  inline uint8_t whoAmI() const {return who_am_i_;}
+  inline float getTemp() const override {return temp_;}
+  inline uint8_t whoAmI() override {return who_am_i_;}
 
  private:
   InvensenseImu imu_;
@@ -132,8 +114,9 @@ class MPU9250 : public Logger {
   static constexpr int32_t SPI_CFG_CLOCK_ = 1000000;
   static constexpr int32_t SPI_READ_CLOCK_ = 15000000;
   /* Configuration */
-  AccelRange accel_range_, requested_accel_range_;
-  GyroRange gyro_range_, requested_gyro_range_;
+  AccelRange accel_range_;
+  GyroRange gyro_range_;
+  uint8_t requested_accel_range_, requested_gyro_range_;
   DlpfBandwidth dlpf_bandwidth_, requested_dlpf_;
   float accel_scale_, requested_accel_scale_;
   float gyro_scale_, requested_gyro_scale_;
