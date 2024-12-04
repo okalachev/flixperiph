@@ -98,16 +98,7 @@ class MPU9250 : public IMUInterface, public Logger {
   bool setRate(Rate rate) override;
   const char* getModel() const override;
   inline bool new_imu_data() const {return new_imu_data_;}
-  inline float accel_x_mps2() const {return accel_[0];}
-  inline float accel_y_mps2() const {return accel_[1];}
-  inline float accel_z_mps2() const {return accel_[2];}
-  inline float gyro_x_radps() const {return gyro_[0];}
-  inline float gyro_y_radps() const {return gyro_[1];}
-  inline float gyro_z_radps() const {return gyro_[2];}
   inline bool new_mag_data() const {return new_mag_data_;}
-  inline float mag_x_ut() const {return mag_[0];}
-  inline float mag_y_ut() const {return mag_[1];}
-  inline float mag_z_ut() const {return mag_[2];}
   inline float getTemp() const override {return temp_;}
   inline uint8_t whoAmI() override {return who_am_i_;}
 
