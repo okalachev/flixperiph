@@ -213,6 +213,12 @@ void ICM20948::getAccel(float& x, float& y, float& z) const {
     x = x * G;
     y = y * G;
     z = z * G;
+    // orient axes to match MPU9250 library
+    // TODO: switch to internal accel and gyro axes
+    double tmp = x;
+    x = y;
+    y = tmp;
+    z = -z;
 }
 
 float ICM20948::getTemp() const {
@@ -233,6 +239,12 @@ void ICM20948::getGyro(float& x, float& y, float& z) const {
     x = x * DEG_TO_RAD;
     y = y * DEG_TO_RAD;
     z = z * DEG_TO_RAD;
+    // orient axes to match MPU9250 library
+    // TODO: switch to internal accel and gyro axes
+    double tmp = x;
+    x = y;
+    y = tmp;
+    z = -z;
 }
 
 void ICM20948::getMag(float& x, float& y, float& z) const {
@@ -243,6 +255,12 @@ void ICM20948::getMag(float& x, float& y, float& z) const {
     x = x * AK09916_MAG_LSB;
     y = y * AK09916_MAG_LSB;
     z = z * AK09916_MAG_LSB;
+    // orient axes to match MPU9250 library
+    // TODO: switch to internal accel and gyro axes
+    double tmp = x;
+    x = -y;
+    y = tmp;
+    z = z;
 }
 
 
