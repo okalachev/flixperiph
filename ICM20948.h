@@ -1,7 +1,7 @@
 /*
  * Code based on: https://github.com/wollewald/ICM20948_WE.
  * Author: Wolfgang (Wolle) Ewald.
- * License: MIT (see LICENSE_ICM20948_WE file).
+ * License: MIT (see LICENSE file).
  * Further information can be found on:
  * https://wolles-elektronikkiste.de/icm-20948-9-achsensensor-teil-i (German)
  * https://wolles-elektronikkiste.de/en/icm-20948-9-axis-sensor-part-i (English)
