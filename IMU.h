@@ -49,7 +49,7 @@ public:
 	virtual void getGyro(float& x, float& y, float& z) const = 0;
 	virtual void getMag(float& x, float& y, float& z) const = 0;
 	virtual float getTemp() const = 0;
-	virtual bool setRate(Rate rate) = 0;
+	virtual bool setRate(const Rate rate) = 0;
 	virtual bool setAccelRange(const AccelRange range) = 0;
 	virtual bool setGyroRange(const GyroRange range) = 0;
 	virtual const char* getModel() const = 0;

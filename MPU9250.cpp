@@ -466,7 +466,7 @@ void MPU9250::getMag(float& x, float& y, float& z) const {
   y = mag_[1];
   z = mag_[2];
 }
-bool MPU9250::setRate(Rate rate) {
+bool MPU9250::setRate(const Rate rate) {
   // TODO:
   log("Rate setting is not implemented");
   return false;

@@ -234,7 +234,7 @@ public:
 	void setTempDLPF(ICM20948_dlpf dlpf);
 	void setI2CMstSampleRate(uint8_t rateExp);
 	void setSPIClockSpeed(unsigned long clock);
-	bool setRate(Rate rate) override;
+	bool setRate(const Rate rate) override;
 
 	/* Results */
 	bool read() override;

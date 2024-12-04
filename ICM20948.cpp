@@ -179,7 +179,7 @@ void ICM20948::setSPIClockSpeed(unsigned long clock) {
 	mySPISettings = SPISettings(clock, MSBFIRST, SPI_MODE0);
 }
 
-bool ICM20948::setRate(Rate rate) {
+bool ICM20948::setRate(const Rate rate) {
 	// output rate = 1125 Hz / (1 + srd)
 	// TODO: Implement this function
 	switch(rate) {

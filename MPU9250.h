@@ -95,7 +95,7 @@ class MPU9250 : public IMUInterface, public Logger {
   void getAccel(float& x, float& y, float& z) const override;
   void getGyro(float& x, float& y, float& z) const override;
   void getMag(float& x, float& y, float& z) const override;
-  bool setRate(Rate rate) override;
+  bool setRate(const Rate rate) override;
   const char* getModel() const override;
   inline bool new_imu_data() const {return new_imu_data_;}
   inline bool new_mag_data() const {return new_mag_data_;}
