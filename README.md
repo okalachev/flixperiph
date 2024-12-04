@@ -6,8 +6,11 @@ Based on:
 
 * [Bolder Flight InvenSense-IMU library](https://github.com/bolderflight/invensense-imu). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 * [Bolder Flight SBUS library](https://github.com/bolderflight/sbus). Original author: Brian Taylor (brian.taylor@bolderflight.com).
+* [ICM20948_WE Arduino library](https://github.com/wollewald/ICM20948_WE/). Original author: Wolfgang Ewald (wolfgang.ewald@wolles-elektronikkiste.de).
 
-## MPU-9250/MPU-6500 IMU
+## IMU
+
+### MPU-9250/MPU-6500
 
 Example for SPI-connected IMU:
 
@@ -45,6 +48,16 @@ Notice, that MPU6500 does not include a magnetometer, so magnetometer data will 
 
 You can also use `<MPU6500.h>` header and `MPU6500` class, which is an alias for `MPU9250` class.
 
+### ICM-20948
+
+The ICM-20948 IMU driver has the same interface. Only the declaration is changed in the example above:
+
+```cpp
+#include <ICM20948.h>
+
+ICM20948 IMU(SPI);
+```
+
 ### Connection
 
 Connecting GY-91 board to ESP32 using VSPI:
@@ -64,6 +77,15 @@ Connecting MPU-92.65 board to ESP32 using VSPI:
 * SDA (MOSI) → IO23
 * AD0 (MISO) → IO19
 * NCS → IO5
+
+Connecting ICM-20948 board to ESP32 using VSPI:
+
+* VCC → 3V3
+* GND → GND
+* SCL → IO18
+* SDA (MOSI) → IO23
+* NCS → IO5
+* AD0 (MISO) → IO19
 
 ### Logging
 
