@@ -304,6 +304,8 @@ bool MPU9250::setDLPF(const DLPF dlpf) {
   DlpfBandwidth val;
   switch (dlpf) {
     case DLPF_OFF:
+      log("Disabling DLPF is not yet implemented");
+      return false;
     case DLPF_MAX:
       val = DLPF_BANDWIDTH_184HZ;
       break;
