@@ -528,7 +528,7 @@ bool ICM20948::initMagnetometer() {
 
 	bool initSuccess = false;
 	uint8_t tries = 0;
-	while(!initSuccess && (tries < 10)){ // max. 10 tries to init the magnetometer
+	while (!initSuccess && (tries < 10)) { // max. 10 tries to init the magnetometer
 		delay(10);
 		enableI2CMaster();
 		delay(10);
