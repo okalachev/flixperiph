@@ -44,6 +44,8 @@ bool ICM20948::begin() {
 	sleep(false);
 	writeRegister8(2, ICM20948_ODR_ALIGN_EN, 1); // aligns ODR
 
+	initMagnetometer();
+
 	return true;
 }
 
