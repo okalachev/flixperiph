@@ -122,8 +122,9 @@ class MPU9250 : public IMUInterface, public Logger {
   static constexpr int32_t SPI_CFG_CLOCK_ = 1000000;
   static constexpr int32_t SPI_READ_CLOCK_ = 15000000;
   /* Configuration */
-  AccelRange accel_range_, requested_accel_range_;
-  GyroRange gyro_range_, requested_gyro_range_;
+  AccelRange accel_range_;
+  GyroRange gyro_range_;
+  uint8_t requested_accel_range_, requested_gyro_range_;
   DlpfBandwidth dlpf_bandwidth_, requested_dlpf_;
   float accel_scale_, requested_accel_scale_;
   float gyro_scale_, requested_gyro_scale_;

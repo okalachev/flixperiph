@@ -63,12 +63,32 @@ void ICM20948::enableAcc(bool enAcc) {
 	writeRegister8(0, ICM20948_PWR_MGMT_2, regVal);
 }
 
-void ICM20948::setAccRange(ICM20948_accRange accRange) {
+bool ICM20948::setAccelRange(const AccelRange range) {
+	int accRange;
+	switch (range) {
+		case ACCEL_RANGE_MIN:
+		case ACCEL_RANGE_2G:
+			accRange = ICM20948_ACC_RANGE_2G;
+			break;
+		case ACCEL_RANGE_4G:
+			accRange = ICM20948_ACC_RANGE_4G;
+			break;
+		case ACCEL_RANGE_8G:
+			accRange = ICM20948_ACC_RANGE_8G;
+			break;
+		case ACCEL_RANGE_16G:
+			accRange = ICM20948_ACC_RANGE_16G;
+			break;
+		default:
+			log("Unsupported accel range: %d", range);
+			return false;
+	}
 	regVal = readRegister8(2, ICM20948_ACCEL_CONFIG);
 	regVal &= ~(0x06);
 	regVal |= (accRange<<1);
 	writeRegister8(2, ICM20948_ACCEL_CONFIG, regVal);
 	accRangeFactor = 1<<accRange;
+	return true;
 }
 
 void ICM20948::setAccDLPF(ICM20948_dlpf dlpf) {
@@ -99,12 +119,32 @@ void ICM20948::enableGyr(bool enGyr) {
 	writeRegister8(0, ICM20948_PWR_MGMT_2, regVal);
 }
 
-void ICM20948::setGyrRange(ICM20948_gyroRange gyroRange) {
+bool ICM20948::setGyroRange(const GyroRange range) {
+	int gyroRange;
+	switch (range) {
+		case GYRO_RANGE_MIN:
+		case GYRO_RANGE_250DPS:
+			gyroRange = ICM20948_GYRO_RANGE_250;
+			break;
+		case GYRO_RANGE_500DPS:
+			gyroRange = ICM20948_GYRO_RANGE_500;
+			break;
+		case GYRO_RANGE_1000DPS:
+			gyroRange = ICM20948_GYRO_RANGE_1000;
+			break;
+		case GYRO_RANGE_2000DPS:
+			gyroRange = ICM20948_GYRO_RANGE_2000;
+			break;
+		default:
+			log("Unsupported gyro range: %d", range);
+			return false;
+	}
 	regVal = readRegister8(2, ICM20948_GYRO_CONFIG_1);
 	regVal &= ~(0x06);
 	regVal |= (gyroRange<<1);
 	writeRegister8(2, ICM20948_GYRO_CONFIG_1, regVal);
 	gyrRangeFactor = (1<<gyroRange);
+	return true;
 }
 
 void ICM20948::setGyrDLPF(ICM20948_dlpf dlpf) {

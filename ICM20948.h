@@ -222,10 +222,12 @@ public:
 	uint8_t whoAmI() override;
 	const char* getModel() const override { return "ICM20948"; }
 	void enableAcc(bool enAcc);
+	bool setAccelRange(const AccelRange range) override;
 	void setAccRange(ICM20948_accRange accRange);
 	void setAccDLPF(ICM20948_dlpf dlpf);
 	void setAccSampleRateDivider(uint16_t accSplRateDiv);
 	void enableGyr(bool enGyr);
+	bool setGyroRange(const GyroRange range) override;
 	void setGyrRange(ICM20948_gyroRange gyroRange);
 	void setGyrDLPF(ICM20948_dlpf dlpf);
 	void setGyrSampleRateDivider(uint8_t gyrSplRateDiv);

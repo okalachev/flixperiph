@@ -8,32 +8,29 @@
 
 class IMUInterface {
 public:
-	enum IMUType {
-		UNKNOWN,
-		MPU9250,
-		MPU9252,
-		MPU6500,
-		ICM20948,
+	enum DLPF {
+		DLPF_OFF,
+		DLPF_MAX,
+		DLPF_BANDWIDTH_100HZ_APPROX,
+		DLPF_BANDWIDTH_50HZ_APPROX,
+		DLPF_BANDWIDTH_5HZ_APPROX,
+		DLPF_BANDWIDTH_MIN
 	};
-	enum DlpfBandwidth : int8_t {
-		DLPF_BANDWIDTH_184HZ = 0x01,
-		DLPF_BANDWIDTH_92HZ = 0x02,
-		DLPF_BANDWIDTH_41HZ = 0x03,
-		DLPF_BANDWIDTH_20HZ = 0x04,
-		DLPF_BANDWIDTH_10HZ = 0x05,
-		DLPF_BANDWIDTH_5HZ = 0x06
+	enum AccelRange {
+		ACCEL_RANGE_MIN,
+		ACCEL_RANGE_2G,
+		ACCEL_RANGE_4G,
+		ACCEL_RANGE_8G,
+		ACCEL_RANGE_16G,
+		ACCEL_RANGE_MAX
 	};
-	enum AccelRange : int8_t {
-		ACCEL_RANGE_2G = 0x00,
-		ACCEL_RANGE_4G = 0x08,
-		ACCEL_RANGE_8G = 0x10,
-		ACCEL_RANGE_16G = 0x18
-	};
-	enum GyroRange : int8_t {
-		GYRO_RANGE_250DPS = 0x00,
-		GYRO_RANGE_500DPS = 0x08,
-		GYRO_RANGE_1000DPS = 0x10,
-		GYRO_RANGE_2000DPS = 0x18
+	enum GyroRange {
+		GYRO_RANGE_MIN,
+		GYRO_RANGE_250DPS,
+		GYRO_RANGE_500DPS,
+		GYRO_RANGE_1000DPS,
+		GYRO_RANGE_2000DPS,
+		GYRO_RANGE_MAX
 	};
 	enum Rate {
 		RATE_MIN,
@@ -53,5 +50,7 @@ public:
 	virtual void getMag(float& x, float& y, float& z) const = 0;
 	virtual float getTemp() const = 0;
 	virtual bool setRate(Rate rate) = 0;
+	virtual bool setAccelRange(const AccelRange range) = 0;
+	virtual bool setGyroRange(const GyroRange range) = 0;
 	virtual const char* getModel() const = 0;
 };

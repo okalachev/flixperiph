@@ -194,29 +194,27 @@ bool MPU9250::setAccelRange(const AccelRange range) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested range and scale */
   switch (range) {
-    case ACCEL_RANGE_2G: {
-      requested_accel_range_ = range;
+    case ACCEL_RANGE_MIN:
+    case ACCEL_RANGE_2G:
+      requested_accel_range_ = 0x00;
       requested_accel_scale_ = 2.0f / 32767.5f;
       break;
-    }
-    case ACCEL_RANGE_4G: {
-      requested_accel_range_ = range;
+    case ACCEL_RANGE_4G:
+      requested_accel_range_ = 0x08;
       requested_accel_scale_ = 4.0f / 32767.5f;
       break;
-    }
-    case ACCEL_RANGE_8G: {
-      requested_accel_range_ = range;
+    case ACCEL_RANGE_8G:
+      requested_accel_range_ = 0x10;
       requested_accel_scale_ = 8.0f / 32767.5f;
       break;
-    }
-    case ACCEL_RANGE_16G: {
-      requested_accel_range_ = range;
+    case ACCEL_RANGE_MAX:
+    case ACCEL_RANGE_16G:
+      requested_accel_range_ = 0x18;
       requested_accel_scale_ = 16.0f / 32767.5f;
       break;
-    }
-    default: {
+    default:
+      log("Unsupported accel range: %d", range);
       return false;
-    }
   }
   /* Try setting the requested range */
   if (!WriteRegister(ACCEL_CONFIG_, requested_accel_range_)) {
@@ -224,7 +222,7 @@ bool MPU9250::setAccelRange(const AccelRange range) {
     return false;
   }
   /* Update stored range and scale */
-  accel_range_ = requested_accel_range_;
+  accel_range_ = range;
   accel_scale_ = requested_accel_scale_;
   return true;
 }
@@ -232,29 +230,26 @@ bool MPU9250::setGyroRange(const GyroRange range) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested range and scale */
   switch (range) {
-    case GYRO_RANGE_250DPS: {
-      requested_gyro_range_ = range;
+    case GYRO_RANGE_MIN:
+    case GYRO_RANGE_250DPS:
+      requested_gyro_range_ = 0x00;
       requested_gyro_scale_ = 250.0f / 32767.5f;
       break;
-    }
-    case GYRO_RANGE_500DPS: {
-      requested_gyro_range_ = range;
+    case GYRO_RANGE_500DPS:
+      requested_gyro_range_ = 0x08;
       requested_gyro_scale_ = 500.0f / 32767.5f;
       break;
-    }
-    case GYRO_RANGE_1000DPS: {
-      requested_gyro_range_ = range;
+    case GYRO_RANGE_1000DPS:
+      requested_gyro_range_ = 0x10;
       requested_gyro_scale_ = 1000.0f / 32767.5f;
       break;
-    }
-    case GYRO_RANGE_2000DPS: {
-      requested_gyro_range_ = range;
+    case GYRO_RANGE_2000DPS:
+      requested_gyro_range_ = 0x18;
       requested_gyro_scale_ = 2000.0f / 32767.5f;
       break;
-    }
-    default: {
+    default:
+      log("Unsupported gyro range: %d", range);
       return false;
-    }
   }
   /* Try setting the requested range */
   if (!WriteRegister(GYRO_CONFIG_, requested_gyro_range_)) {
@@ -262,7 +257,7 @@ bool MPU9250::setGyroRange(const GyroRange range) {
     return false;
   }
   /* Update stored range and scale */
-  gyro_range_ = requested_gyro_range_;
+  gyro_range_ = range;
   gyro_scale_ = requested_gyro_scale_;
   return true;
 }
