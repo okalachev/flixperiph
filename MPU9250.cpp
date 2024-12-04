@@ -489,9 +489,19 @@ void MPU9250::getMag(float& x, float& y, float& z) const {
   z = mag_[2];
 }
 bool MPU9250::setRate(const Rate rate) {
-  // TODO:
-  log("Rate setting is not implemented");
-  return false;
+  // TODO: consider DLPF setting (8 Khz possible without DLPF)
+  switch (rate) {
+    case RATE_MIN:
+      return setSrd(255); // ~4 Hz
+    case RATE_50HZ_APPROX:
+      return setSrd(19); // 50 Hz
+    case RATE_MAX:
+    case RATE_1KHZ_APPROX:
+      return setSrd(0); // 1 kHz
+    default:
+      log("Unsupported rate setting");
+      return false;
+  }
 }
 const char* MPU9250::getModel() const {
   switch (who_am_i_) {
