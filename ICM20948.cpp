@@ -23,37 +23,37 @@
 *
 *********************************************************************/
 
-#include "ICM20948_WE.h"
+#include "ICM20948.h"
 
 /************ Basic Settings ************/ 
 
-bool ICM20948_WE::init(){
+bool ICM20948::begin(){
     if(useSPI){
+        _spi->begin();
+        if (csPin == -1) {
+            // use default CS pin
+            #ifdef ESP32
+                csPin = _spi->pinSS();
+            #else
+                csPin = SS;
+            #endif
+        }
         pinMode(csPin, OUTPUT);
         digitalWrite(csPin, HIGH);
-        _spi->begin();
         mySPISettings = SPISettings(7000000, MSBFIRST, SPI_MODE0);      
     }   
     currentBank = 0;
     
-    reset_ICM20948();
+    reset();
     if(whoAmI() != ICM20948_WHO_AM_I_CONTENT){
         delay(2000);
         if(whoAmI() != ICM20948_WHO_AM_I_CONTENT){
+            log("Error: incorrect WHO_AM_I value: 0x%02X", whoAmI());
             return false;
         }
     }
     
-    accOffsetVal.x = 0.0;
-    accOffsetVal.y = 0.0;
-    accOffsetVal.z = 0.0;
-    accCorrFactor.x = 1.0;
-    accCorrFactor.y = 1.0;
-    accCorrFactor.z = 1.0;
     accRangeFactor = 1.0;
-    gyrOffsetVal.x = 0.0;
-    gyrOffsetVal.y = 0.0;
-    gyrOffsetVal.z = 0.0;
     gyrRangeFactor = 1.0;
     fifoType = ICM20948_FIFO_ACC;
         
@@ -63,88 +63,11 @@ bool ICM20948_WE::init(){
     return true;
 }
 
-void ICM20948_WE::autoOffsets(){
-    xyzFloat accRawVal, gyrRawVal;
-    accOffsetVal.x = 0.0;
-    accOffsetVal.y = 0.0;
-    accOffsetVal.z = 0.0;
-        
-    setGyrDLPF(ICM20948_DLPF_6); // lowest noise
-    setGyrRange(ICM20948_GYRO_RANGE_250); // highest resolution
-    setAccRange(ICM20948_ACC_RANGE_2G);
-    setAccDLPF(ICM20948_DLPF_6);
-    delay(100);
-
-	for(int i=0; i<10; i++){  // Allow to get stable values
-        readSensor();
-		delay(10);
-    }
-    
-    for(int i=0; i<50; i++){
-        readSensor();
-        accRawVal = getAccRawValues();
-        accOffsetVal.x += accRawVal.x;
-        accOffsetVal.y += accRawVal.y;
-        accOffsetVal.z += accRawVal.z;
-        delay(10);
-    }
-    
-    accOffsetVal.x /= 50;
-    accOffsetVal.y /= 50;
-    accOffsetVal.z /= 50;
-    accOffsetVal.z -= 16384.0;
-    
-    for(int i=0; i<50; i++){
-        readSensor();
-        gyrRawVal = getGyrRawValues();
-        gyrOffsetVal.x += gyrRawVal.x;
-        gyrOffsetVal.y += gyrRawVal.y;
-        gyrOffsetVal.z += gyrRawVal.z;
-        delay(1);
-    }
-    
-    gyrOffsetVal.x /= 50;
-    gyrOffsetVal.y /= 50;
-    gyrOffsetVal.z /= 50;
-    
-}
-
-void ICM20948_WE::setAccOffsets(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax){
-    accOffsetVal.x = (xMax + xMin) * 0.5;
-    accOffsetVal.y = (yMax + yMin) * 0.5;
-    accOffsetVal.z = (zMax + zMin) * 0.5;
-    accCorrFactor.x = (xMax + abs(xMin)) / 32768.0;
-    accCorrFactor.y = (yMax + abs(yMin)) / 32768.0;
-    accCorrFactor.z = (zMax + abs(zMin)) / 32768.0 ;    
-}
-
-void ICM20948_WE::setAccOffsets(xyzFloat offset){
-    accOffsetVal = offset;
-}
-
-xyzFloat ICM20948_WE::getAccOffsets(){
-    return accOffsetVal;
-}
-
-void ICM20948_WE::setGyrOffsets(float xOffset, float yOffset, float zOffset){
-    gyrOffsetVal.x = xOffset;
-    gyrOffsetVal.y = yOffset;
-    gyrOffsetVal.z = zOffset;
-}
-
-void ICM20948_WE::setGyrOffsets(xyzFloat offset){
-    gyrOffsetVal = offset;
-}
-
-xyzFloat ICM20948_WE::getGyrOffsets(){
-    return gyrOffsetVal;
-}
-
-uint8_t ICM20948_WE::whoAmI(){
+uint8_t ICM20948::whoAmI() {
     return readRegister8(0, ICM20948_WHO_AM_I);
 }
 
-void ICM20948_WE::enableAcc(bool enAcc){
+void ICM20948::enableAcc(bool enAcc){
     regVal = readRegister8(0, ICM20948_PWR_MGMT_2);
     if(enAcc){
         regVal &= ~ICM20948_ACC_EN;
@@ -155,7 +78,7 @@ void ICM20948_WE::enableAcc(bool enAcc){
     writeRegister8(0, ICM20948_PWR_MGMT_2, regVal);
 }
 
-void ICM20948_WE::setAccRange(ICM20948_accRange accRange){
+void ICM20948::setAccRange(ICM20948_accRange accRange){
     regVal = readRegister8(2, ICM20948_ACCEL_CONFIG);
     regVal &= ~(0x06);
     regVal |= (accRange<<1);
@@ -163,7 +86,7 @@ void ICM20948_WE::setAccRange(ICM20948_accRange accRange){
     accRangeFactor = 1<<accRange;
 }
 
-void ICM20948_WE::setAccDLPF(ICM20948_dlpf dlpf){
+void ICM20948::setAccDLPF(ICM20948_dlpf dlpf){
     regVal = readRegister8(2, ICM20948_ACCEL_CONFIG);
     if(dlpf==ICM20948_DLPF_OFF){
         regVal &= 0xFE;
@@ -178,11 +101,11 @@ void ICM20948_WE::setAccDLPF(ICM20948_dlpf dlpf){
     writeRegister8(2, ICM20948_ACCEL_CONFIG, regVal);
 }   
 
-void ICM20948_WE::setAccSampleRateDivider(uint16_t accSplRateDiv){
+void ICM20948::setAccSampleRateDivider(uint16_t accSplRateDiv){
     writeRegister16(2, ICM20948_ACCEL_SMPLRT_DIV_1, accSplRateDiv);
 }
 
-void ICM20948_WE::enableGyr(bool enGyr){
+void ICM20948::enableGyr(bool enGyr){
     regVal = readRegister8(0, ICM20948_PWR_MGMT_2);
     if(enGyr){
         regVal &= ~ICM20948_GYR_EN;
@@ -193,7 +116,7 @@ void ICM20948_WE::enableGyr(bool enGyr){
     writeRegister8(0, ICM20948_PWR_MGMT_2, regVal);
 }
 
-void ICM20948_WE::setGyrRange(ICM20948_gyroRange gyroRange){
+void ICM20948::setGyrRange(ICM20948_gyroRange gyroRange){
     regVal = readRegister8(2, ICM20948_GYRO_CONFIG_1);
     regVal &= ~(0x06);
     regVal |= (gyroRange<<1);
@@ -201,7 +124,7 @@ void ICM20948_WE::setGyrRange(ICM20948_gyroRange gyroRange){
     gyrRangeFactor = (1<<gyroRange);
 }
 
-void ICM20948_WE::setGyrDLPF(ICM20948_dlpf dlpf){
+void ICM20948::setGyrDLPF(ICM20948_dlpf dlpf){
     regVal = readRegister8(2, ICM20948_GYRO_CONFIG_1);
     if(dlpf==ICM20948_DLPF_OFF){
         regVal &= 0xFE;
@@ -216,147 +139,116 @@ void ICM20948_WE::setGyrDLPF(ICM20948_dlpf dlpf){
     writeRegister8(2, ICM20948_GYRO_CONFIG_1, regVal);
 }   
 
-void ICM20948_WE::setGyrSampleRateDivider(uint8_t gyrSplRateDiv){
+void ICM20948::setGyrSampleRateDivider(uint8_t gyrSplRateDiv){
     writeRegister8(2, ICM20948_GYRO_SMPLRT_DIV, gyrSplRateDiv);
 }
 
-void ICM20948_WE::setTempDLPF(ICM20948_dlpf dlpf){
+void ICM20948::setTempDLPF(ICM20948_dlpf dlpf){
     writeRegister8(2, ICM20948_TEMP_CONFIG, dlpf);
 }
 
-void ICM20948_WE::setI2CMstSampleRate(uint8_t rateExp){
+void ICM20948::setI2CMstSampleRate(uint8_t rateExp){
     if(rateExp < 16){
         writeRegister8(3, ICM20948_I2C_MST_ODR_CFG, rateExp);
     }
 }
 
-void ICM20948_WE::setSPIClockSpeed(unsigned long clock){
+void ICM20948::setSPIClockSpeed(unsigned long clock){
     mySPISettings = SPISettings(clock, MSBFIRST, SPI_MODE0);
 }
-    
-/************* x,y,z results *************/
-        
-void ICM20948_WE::readSensor(){
+
+bool ICM20948::setRate(Rate rate) {
+    // output rate = 1125 Hz / (1 + srd)
+    // TODO: Implement this function
+    switch(rate) {
+        case RATE_MIN: // 1.125 Hz
+            setAccSampleRateDivider(0x4F);
+            setGyrSampleRateDivider(0x4F);
+            setI2CMstSampleRate(0x4F);
+            return true;
+        case RATE_50HZ_APPROX: // 37 Hz
+            setAccSampleRateDivider(0x07);
+            setGyrSampleRateDivider(0x07);
+            setI2CMstSampleRate(0x07);
+            return true;
+        case RATE_MAX:
+        case RATE_1KHZ_APPROX: // 1125 Hz
+            setAccSampleRateDivider(0);
+            setGyrSampleRateDivider(0);
+            setI2CMstSampleRate(0);
+            return true;
+        default:
+            log("Unsupported rate setting");
+            return false;
+    }
+}
+
+/************* Results *************/
+
+bool ICM20948::read(){
     readAllData(buffer);
+    return true;
 }
 
-xyzFloat ICM20948_WE::getAccRawValues(){
-    xyzFloat accRawVal;
-    accRawVal.x = static_cast<int16_t>(((buffer[0]) << 8) | buffer[1]) * 1.0;
-    accRawVal.y = static_cast<int16_t>(((buffer[2]) << 8) | buffer[3]) * 1.0;
-    accRawVal.z = static_cast<int16_t>(((buffer[4]) << 8) | buffer[5]) * 1.0;
-    return accRawVal;
+void ICM20948::waitForData() {
+    const static uint8_t RAW_DATA_0_RDY_INT = 0x01;
+    while (true) {
+        uint8_t intStatus1 = readRegister8(0, ICM20948_INT_STATUS_1);
+        bool dataReady = intStatus1 & RAW_DATA_0_RDY_INT;
+        if (dataReady) break;
+    }
+    read();
 }
 
-xyzFloat ICM20948_WE::getCorrectedAccRawValues(){
-    xyzFloat accRawVal = getAccRawValues();   
-    accRawVal = correctAccRawValues(accRawVal);
-    
-    return accRawVal;
+void ICM20948::getAccel(float& x, float& y, float& z) const {
+    x = static_cast<int16_t>(((buffer[0]) << 8) | buffer[1]) * 1.0;
+    y = static_cast<int16_t>(((buffer[2]) << 8) | buffer[3]) * 1.0;
+    z = static_cast<int16_t>(((buffer[4]) << 8) | buffer[5]) * 1.0;
+    // raw to g
+    x = x * accRangeFactor / 16384.0;
+    y = y * accRangeFactor / 16384.0;
+    z = z * accRangeFactor / 16384.0;
+    // convert to m/s^2
+	static constexpr float G = 9.80665f;
+    x = x * G;
+    y = y * G;
+    z = z * G;
 }
 
-xyzFloat ICM20948_WE::getGValues(){
-    xyzFloat gVal, accRawVal;
-    accRawVal = getCorrectedAccRawValues();
-    
-    gVal.x = accRawVal.x * accRangeFactor / 16384.0;
-    gVal.y = accRawVal.y * accRangeFactor / 16384.0;
-    gVal.z = accRawVal.z * accRangeFactor / 16384.0;
-    return gVal;
-}
-
-xyzFloat ICM20948_WE::getAccRawValuesFromFifo(){
-    xyzFloat accRawVal = readICM20948xyzValFromFifo();
-    return accRawVal;   
-}
-
-xyzFloat ICM20948_WE::getCorrectedAccRawValuesFromFifo(){
-    xyzFloat accRawVal = getAccRawValuesFromFifo();
-    accRawVal = correctAccRawValues(accRawVal);
-    
-    return accRawVal;
-}
-
-xyzFloat ICM20948_WE::getGValuesFromFifo(){
-    xyzFloat gVal, accRawVal;
-    accRawVal = getCorrectedAccRawValuesFromFifo();
-    
-    gVal.x = accRawVal.x * accRangeFactor / 16384.0;
-    gVal.y = accRawVal.y * accRangeFactor / 16384.0;
-    gVal.z = accRawVal.z * accRangeFactor / 16384.0;
-    return gVal;
-}
-
-float ICM20948_WE::getResultantG(xyzFloat gVal){
-    float resultant = 0.0;
-    resultant = sqrt(sq(gVal.x) + sq(gVal.y) + sq(gVal.z));
-    
-    return resultant;
-}
-
-float ICM20948_WE::getTemperature(){
+float ICM20948::getTemp() const {
     int16_t rawTemp = static_cast<int16_t>(((buffer[12]) << 8) | buffer[13]);
     float tmp = (rawTemp*1.0 - ICM20948_ROOM_TEMP_OFFSET)/ICM20948_T_SENSITIVITY + 21.0;
     return tmp;
 }
 
-xyzFloat ICM20948_WE::getGyrRawValues(){
-    xyzFloat gyrRawVal;
-    
-    gyrRawVal.x = (int16_t)(((buffer[6]) << 8) | buffer[7]) * 1.0;
-    gyrRawVal.y = (int16_t)(((buffer[8]) << 8) | buffer[9]) * 1.0;
-    gyrRawVal.z = (int16_t)(((buffer[10]) << 8) | buffer[11]) * 1.0;
-    
-    return gyrRawVal;
+void ICM20948::getGyro(float& x, float& y, float& z) const {
+    x = (int16_t)(((buffer[6]) << 8) | buffer[7]) * 1.0;
+    y = (int16_t)(((buffer[8]) << 8) | buffer[9]) * 1.0;
+    z = (int16_t)(((buffer[10]) << 8) | buffer[11]) * 1.0;
+    // raw to dps
+    x = x * gyrRangeFactor * 250.0 / 32768.0;
+    y = y * gyrRangeFactor * 250.0 / 32768.0;
+    z = z * gyrRangeFactor * 250.0 / 32768.0;
+    // convert to rad/s
+    x = x * DEG_TO_RAD;
+    y = y * DEG_TO_RAD;
+    z = z * DEG_TO_RAD;
 }
 
-xyzFloat ICM20948_WE::getCorrectedGyrRawValues(){
-    xyzFloat gyrRawVal = getGyrRawValues(); 
-    gyrRawVal = correctGyrRawValues(gyrRawVal);
-    return gyrRawVal;
-}
-
-xyzFloat ICM20948_WE::getGyrValues(){
-    xyzFloat gyrVal = getCorrectedGyrRawValues();
-    
-    gyrVal.x = gyrVal.x * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.y = gyrVal.y * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.z = gyrVal.z * gyrRangeFactor * 250.0 / 32768.0;
-     
-    return gyrVal;
-}
-
-xyzFloat ICM20948_WE::getGyrValuesFromFifo(){
-    xyzFloat gyrVal;
-    xyzFloat gyrRawVal = readICM20948xyzValFromFifo();
-    
-    gyrRawVal = correctGyrRawValues(gyrRawVal);
-    gyrVal.x = gyrRawVal.x * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.y = gyrRawVal.y * gyrRangeFactor * 250.0 / 32768.0;
-    gyrVal.z = gyrRawVal.z * gyrRangeFactor * 250.0 / 32768.0;
-    
-    return gyrVal;  
-}
-
-xyzFloat ICM20948_WE::getMagValues(){
-    int16_t x,y,z;
-    xyzFloat mag;
-    
+void ICM20948::getMag(float& x, float& y, float& z) const {
     x = static_cast<int16_t>((buffer[15]) << 8) | buffer[14];
     y = static_cast<int16_t>((buffer[17]) << 8) | buffer[16];
     z = static_cast<int16_t>((buffer[19]) << 8) | buffer[18];
-    
-    mag.x = x * AK09916_MAG_LSB;
-    mag.y = y * AK09916_MAG_LSB;
-    mag.z = z * AK09916_MAG_LSB;
-    
-    return mag;
+    // correct values
+    x = x * AK09916_MAG_LSB;
+    y = y * AK09916_MAG_LSB;
+    z = z * AK09916_MAG_LSB;
 }
 
 
 /********* Power, Sleep, Standby *********/ 
 
-void ICM20948_WE::enableCycle(ICM20948_cycle cycle){
+void ICM20948::enableCycle(ICM20948_cycle cycle){
     regVal = readRegister8(0, ICM20948_LP_CONFIG);
     regVal &= 0x0F;
     regVal |= cycle;
@@ -364,7 +256,7 @@ void ICM20948_WE::enableCycle(ICM20948_cycle cycle){
     writeRegister8(0, ICM20948_LP_CONFIG, regVal);
 }
 
-void ICM20948_WE::enableLowPower(bool enLP){    // vielleicht besser privat????
+void ICM20948::enableLowPower(bool enLP){    // vielleicht besser privat????
     regVal = readRegister8(0, ICM20948_PWR_MGMT_1);
     if(enLP){
         regVal |= ICM20948_LP_EN;
@@ -375,15 +267,15 @@ void ICM20948_WE::enableLowPower(bool enLP){    // vielleicht besser privat????
     writeRegister8(0, ICM20948_PWR_MGMT_1, regVal);
 }
 
-void ICM20948_WE::setGyrAverageInCycleMode(ICM20948_gyroAvgLowPower avg){
+void ICM20948::setGyrAverageInCycleMode(ICM20948_gyroAvgLowPower avg){
     writeRegister8(2, ICM20948_GYRO_CONFIG_2, avg);
 }
 
-void ICM20948_WE::setAccAverageInCycleMode(ICM20948_accAvgLowPower avg){
+void ICM20948::setAccAverageInCycleMode(ICM20948_accAvgLowPower avg){
     writeRegister8(2, ICM20948_ACCEL_CONFIG_2, avg);
 }
 
-void ICM20948_WE::sleep(bool sleep){
+void ICM20948::sleep(bool sleep){
     regVal = readRegister8(0, ICM20948_PWR_MGMT_1);
     if(sleep){
         regVal |= ICM20948_SLEEP;
@@ -393,101 +285,10 @@ void ICM20948_WE::sleep(bool sleep){
     }
     writeRegister8(0, ICM20948_PWR_MGMT_1, regVal);
 }
-        
-/******** Angles and Orientation *********/ 
-    
-xyzFloat ICM20948_WE::getAngles(){
-    xyzFloat angleVal;
-    xyzFloat gVal = getGValues();
-    if(gVal.x > 1.0){
-        gVal.x = 1.0;
-    }
-    else if(gVal.x < -1.0){
-        gVal.x = -1.0;
-    }
-    angleVal.x = (asin(gVal.x)) * 57.296;
-    
-    if(gVal.y > 1.0){
-        gVal.y = 1.0;
-    }
-    else if(gVal.y < -1.0){
-        gVal.y = -1.0;
-    }
-    angleVal.y = (asin(gVal.y)) * 57.296;
-    
-    if(gVal.z > 1.0){
-        gVal.z = 1.0;
-    }
-    else if(gVal.z < -1.0){
-        gVal.z = -1.0;
-    }
-    angleVal.z = (asin(gVal.z)) * 57.296;
-    
-    return angleVal;
-}
-
-ICM20948_orientation ICM20948_WE::getOrientation(){
-    xyzFloat angleVal = getAngles();
-    ICM20948_orientation orientation = ICM20948_FLAT;
-    if(abs(angleVal.x) < 45){      // |x| < 45
-        if(abs(angleVal.y) < 45){      // |y| < 45
-            if(angleVal.z > 0){          //  z  > 0
-                orientation = ICM20948_FLAT;
-            }
-            else{                        //  z  < 0
-                orientation = ICM20948_FLAT_1;
-            }
-        }
-        else{                         // |y| > 45 
-            if(angleVal.y > 0){         //  y  > 0
-                orientation = ICM20948_XY;
-            }
-            else{                       //  y  < 0
-                orientation = ICM20948_XY_1;   
-            }
-        }
-    }
-    else{                           // |x| >= 45
-        if(angleVal.x > 0){           //  x  >  0
-            orientation = ICM20948_YX;       
-        }
-        else{                       //  x  <  0
-            orientation = ICM20948_YX_1;
-        }
-    }
-    return orientation;
-}
-
-String ICM20948_WE::getOrientationAsString(){
-    ICM20948_orientation orientation = getOrientation();
-    String orientationAsString = "";
-    switch(orientation){
-        case ICM20948_FLAT:      orientationAsString = "z up";   break;
-        case ICM20948_FLAT_1:    orientationAsString = "z down"; break;
-        case ICM20948_XY:        orientationAsString = "y up";   break;
-        case ICM20948_XY_1:      orientationAsString = "y down"; break;
-        case ICM20948_YX:        orientationAsString = "x up";   break;
-        case ICM20948_YX_1:      orientationAsString = "x down"; break;
-    }
-    return orientationAsString;
-}
-    
-float ICM20948_WE::getPitch(){
-    xyzFloat angleVal = getAngles();
-    float pitch = (atan2(-angleVal.x, sqrt(abs((angleVal.y*angleVal.y + angleVal.z*angleVal.z))))*180.0)/M_PI;
-    return pitch;
-}
-    
-float ICM20948_WE::getRoll(){
-    xyzFloat angleVal = getAngles();
-    float roll = (atan2(angleVal.y, angleVal.z)*180.0)/M_PI;
-    return roll;
-}
-
 
 /************** Interrupts ***************/
 
-void ICM20948_WE::setIntPinPolarity(ICM20948_intPinPol pol){
+void ICM20948::setIntPinPolarity(ICM20948_intPinPol pol){
     regVal = readRegister8(0, ICM20948_INT_PIN_CFG);
     if(pol){
         regVal |= ICM20948_INT1_ACTL;
@@ -498,7 +299,7 @@ void ICM20948_WE::setIntPinPolarity(ICM20948_intPinPol pol){
     writeRegister8(0, ICM20948_INT_PIN_CFG, regVal);
 }
 
-void ICM20948_WE::enableIntLatch(bool latch){
+void ICM20948::enableIntLatch(bool latch){
     regVal = readRegister8(0, ICM20948_INT_PIN_CFG);
     if(latch){
         regVal |= ICM20948_INT_1_LATCH_EN;
@@ -509,7 +310,7 @@ void ICM20948_WE::enableIntLatch(bool latch){
     writeRegister8(0, ICM20948_INT_PIN_CFG, regVal);
 }
 
-void ICM20948_WE::enableClearIntByAnyRead(bool clearByAnyRead){
+void ICM20948::enableClearIntByAnyRead(bool clearByAnyRead){
     regVal = readRegister8(0, ICM20948_INT_PIN_CFG);
     if(clearByAnyRead){
         regVal |= ICM20948_INT_ANYRD_2CLEAR;
@@ -520,7 +321,7 @@ void ICM20948_WE::enableClearIntByAnyRead(bool clearByAnyRead){
     writeRegister8(0, ICM20948_INT_PIN_CFG, regVal);
 }
 
-void ICM20948_WE::setFSyncIntPolarity(ICM20948_intPinPol pol){
+void ICM20948::setFSyncIntPolarity(ICM20948_intPinPol pol){
     regVal = readRegister8(0, ICM20948_INT_PIN_CFG);
     if(pol){
         regVal |= ICM20948_ACTL_FSYNC;
@@ -531,7 +332,7 @@ void ICM20948_WE::setFSyncIntPolarity(ICM20948_intPinPol pol){
     writeRegister8(0, ICM20948_INT_PIN_CFG, regVal);
 }
 
-void ICM20948_WE::enableInterrupt(ICM20948_intType intType){
+void ICM20948::enableInterrupt(ICM20948_intType intType){
     switch(intType){
         case ICM20948_FSYNC_INT:
             regVal = readRegister8(0, ICM20948_INT_PIN_CFG);
@@ -571,7 +372,7 @@ void ICM20948_WE::enableInterrupt(ICM20948_intType intType){
     }
 }
 
-void ICM20948_WE::disableInterrupt(ICM20948_intType intType){
+void ICM20948::disableInterrupt(ICM20948_intType intType){
     switch(intType){
         case ICM20948_FSYNC_INT:
             regVal = readRegister8(0, ICM20948_INT_PIN_CFG);
@@ -611,7 +412,7 @@ void ICM20948_WE::disableInterrupt(ICM20948_intType intType){
     }
 }
 
-uint8_t ICM20948_WE::readAndClearInterrupts(){
+uint8_t ICM20948::readAndClearInterrupts(){
     uint8_t intSource = 0;
     regVal = readRegister8(0, ICM20948_I2C_MST_STATUS);
     if(regVal & 0x80){
@@ -639,11 +440,11 @@ uint8_t ICM20948_WE::readAndClearInterrupts(){
     return intSource;
 }
 
-bool ICM20948_WE::checkInterrupt(uint8_t source, ICM20948_intType type){
+bool ICM20948::checkInterrupt(uint8_t source, ICM20948_intType type){
     source &= type;
     return source;
 }
-void ICM20948_WE::setWakeOnMotionThreshold(uint8_t womThresh, ICM20948_womCompEn womCompEn){
+void ICM20948::setWakeOnMotionThreshold(uint8_t womThresh, ICM20948_womCompEn womCompEn){
     regVal = readRegister8(2, ICM20948_ACCEL_INTEL_CTRL);
     if(womCompEn){
         regVal |= 0x01;
@@ -657,7 +458,7 @@ void ICM20948_WE::setWakeOnMotionThreshold(uint8_t womThresh, ICM20948_womCompEn
 
 /***************** FIFO ******************/
 
-void ICM20948_WE::enableFifo(bool fifo){
+void ICM20948::enableFifo(bool fifo){
     regVal = readRegister8(0, ICM20948_USER_CTRL);
     if(fifo){
         regVal |= ICM20948_FIFO_EN;
@@ -668,7 +469,7 @@ void ICM20948_WE::enableFifo(bool fifo){
     writeRegister8(0, ICM20948_USER_CTRL, regVal);
 }
 
-void ICM20948_WE::setFifoMode(ICM20948_fifoMode mode){
+void ICM20948::setFifoMode(ICM20948_fifoMode mode){
     if(mode){
         regVal = 0x01;
     }
@@ -678,26 +479,26 @@ void ICM20948_WE::setFifoMode(ICM20948_fifoMode mode){
     writeRegister8(0, ICM20948_FIFO_MODE, regVal);
 }
 
-void ICM20948_WE::startFifo(ICM20948_fifoType fifo){
+void ICM20948::startFifo(ICM20948_fifoType fifo){
     fifoType = fifo;
     writeRegister8(0, ICM20948_FIFO_EN_2, fifoType);
 }
 
-void ICM20948_WE::stopFifo(){
+void ICM20948::stopFifo(){
     writeRegister8(0, ICM20948_FIFO_EN_2, 0);
 }
 
-void ICM20948_WE::resetFifo(){
+void ICM20948::resetFifo(){
     writeRegister8(0, ICM20948_FIFO_RST, 0x01);
     writeRegister8(0, ICM20948_FIFO_RST, 0x00);
 }
 
-int16_t ICM20948_WE::getFifoCount(){
+int16_t ICM20948::getFifoCount(){
     int16_t regVal16 = static_cast<int16_t>(readRegister16(0, ICM20948_FIFO_COUNT));
     return regVal16;
 }
 
-int16_t ICM20948_WE::getNumberOfFifoDataSets(){
+int16_t ICM20948::getNumberOfFifoDataSets(){
     int16_t numberOfSets = getFifoCount();
         
     if((fifoType == ICM20948_FIFO_ACC) || (fifoType == ICM20948_FIFO_GYR)){
@@ -710,7 +511,7 @@ int16_t ICM20948_WE::getNumberOfFifoDataSets(){
     return numberOfSets;
 }
 
-void ICM20948_WE::findFifoBegin(){
+void ICM20948::findFifoBegin(){
     uint16_t count = getFifoCount();
     int16_t start = 0;
         
@@ -731,10 +532,10 @@ void ICM20948_WE::findFifoBegin(){
 
 /************** Magnetometer **************/
 
-bool ICM20948_WE::initMagnetometer(){
+bool ICM20948::initMagnetometer(){
     enableI2CMaster();
     resetMag();
-    reset_ICM20948();
+    reset();
     sleep(false);
     writeRegister8(2, ICM20948_ODR_ALIGN_EN, 1); // aligns ODR 
     
@@ -761,11 +562,11 @@ bool ICM20948_WE::initMagnetometer(){
     return initSuccess;
 }
 
-uint16_t ICM20948_WE::whoAmIMag(){
+uint16_t ICM20948::whoAmIMag(){
     return static_cast<uint16_t>(readAK09916Register16(AK09916_WIA_1));
 }
 
-void ICM20948_WE::setMagOpMode(AK09916_opMode opMode){
+void ICM20948::setMagOpMode(AK09916_opMode opMode){
     writeAK09916Register8(AK09916_CNTL_2, opMode);
     delay(10);
     if(opMode!=AK09916_PWR_DOWN){
@@ -773,7 +574,7 @@ void ICM20948_WE::setMagOpMode(AK09916_opMode opMode){
     }
 }
 
-void ICM20948_WE::resetMag(){
+void ICM20948::resetMag(){
     writeAK09916Register8(AK09916_CNTL_3, 0x01);
     delay(100);
 }
@@ -782,30 +583,14 @@ void ICM20948_WE::resetMag(){
      Private Functions
 *************************************************/
 
-void ICM20948_WE::setClockToAutoSelect(){
+void ICM20948::setClockToAutoSelect(){
     regVal = readRegister8(0, ICM20948_PWR_MGMT_1);
     regVal |= 0x01;
     writeRegister8(0, ICM20948_PWR_MGMT_1, regVal);
     delay(10);
 }
 
-xyzFloat ICM20948_WE::correctAccRawValues(xyzFloat accRawVal){
-    accRawVal.x = (accRawVal.x -(accOffsetVal.x / accRangeFactor)) / accCorrFactor.x;
-    accRawVal.y = (accRawVal.y -(accOffsetVal.y / accRangeFactor)) / accCorrFactor.y;
-    accRawVal.z = (accRawVal.z -(accOffsetVal.z / accRangeFactor)) / accCorrFactor.z;
-    
-    return accRawVal;
-}
-
-xyzFloat ICM20948_WE::correctGyrRawValues(xyzFloat gyrRawVal){
-    gyrRawVal.x -= (gyrOffsetVal.x / gyrRangeFactor);
-    gyrRawVal.y -= (gyrOffsetVal.y / gyrRangeFactor);
-    gyrRawVal.z -= (gyrOffsetVal.z / gyrRangeFactor);
-    
-    return gyrRawVal;
-}
-
-void ICM20948_WE::switchBank(uint8_t newBank){
+void ICM20948::switchBank(uint8_t newBank){
     if(newBank != currentBank){
         currentBank = newBank;
         if(!useSPI){
@@ -825,7 +610,7 @@ void ICM20948_WE::switchBank(uint8_t newBank){
     }
 }
 
-void ICM20948_WE::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
+void ICM20948::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
     switchBank(bank);
         
     if(!useSPI){
@@ -844,7 +629,7 @@ void ICM20948_WE::writeRegister8(uint8_t bank, uint8_t reg, uint8_t val){
     }
 }
 
-void ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
+void ICM20948::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
     switchBank(bank);
     int8_t MSByte = static_cast<int8_t>((val>>8) & 0xFF);
     uint8_t LSByte = val & 0xFF;
@@ -866,7 +651,7 @@ void ICM20948_WE::writeRegister16(uint8_t bank, uint8_t reg, int16_t val){
     }
 }
 
-uint8_t ICM20948_WE::readRegister8(uint8_t bank, uint8_t reg){
+uint8_t ICM20948::readRegister8(uint8_t bank, uint8_t reg){
     switchBank(bank);
     uint8_t regValue = 0;
     
@@ -891,7 +676,7 @@ uint8_t ICM20948_WE::readRegister8(uint8_t bank, uint8_t reg){
     return regValue;
 }
 
-int16_t ICM20948_WE::readRegister16(uint8_t bank, uint8_t reg){
+int16_t ICM20948::readRegister16(uint8_t bank, uint8_t reg){
     switchBank(bank);
     uint8_t MSByte = 0, LSByte = 0;
     int16_t reg16Val = 0;
@@ -920,7 +705,7 @@ int16_t ICM20948_WE::readRegister16(uint8_t bank, uint8_t reg){
     return reg16Val;
 }
 
-void ICM20948_WE::readAllData(uint8_t* data){    
+void ICM20948::readAllData(uint8_t* data){    
     switchBank(0);
     
     if(!useSPI){
@@ -947,56 +732,21 @@ void ICM20948_WE::readAllData(uint8_t* data){
     }
 }
 
-xyzFloat ICM20948_WE::readICM20948xyzValFromFifo(){
-    uint8_t fifoTriple[6];
-    xyzFloat xyzResult = {0.0, 0.0, 0.0};
-    switchBank(0);
-   
-    if(!useSPI){
-        _wire->beginTransmission(i2cAddress);
-        _wire->write(ICM20948_FIFO_R_W);
-        _wire->endTransmission(false);
-        _wire->requestFrom(i2cAddress, static_cast<uint8_t>(6));
-        if(_wire->available()){
-            for(int i=0; i<6; i++){
-                fifoTriple[i] = _wire->read();
-            }
-        }
-    }
-    else{
-        uint8_t reg = ICM20948_FIFO_R_W | 0x80;
-        _spi->beginTransaction(mySPISettings);
-        digitalWrite(csPin, LOW);
-        _spi->transfer(reg);
-        for(int i=0; i<6; i++){
-                fifoTriple[i] = _spi->transfer(0x00);
-        }
-        digitalWrite(csPin, HIGH);
-        _spi->endTransaction();
-    }
-    
-    xyzResult.x = (static_cast<int16_t>((fifoTriple[0]<<8) + fifoTriple[1])) * 1.0;
-    xyzResult.y = (static_cast<int16_t>((fifoTriple[2]<<8) + fifoTriple[3])) * 1.0;
-    xyzResult.z = (static_cast<int16_t>((fifoTriple[4]<<8) + fifoTriple[5])) * 1.0;
-    
-    return xyzResult; 
-}
-
-void ICM20948_WE::writeAK09916Register8(uint8_t reg, uint8_t val){
+void ICM20948::writeAK09916Register8(uint8_t reg, uint8_t val){
     writeRegister8(3, ICM20948_I2C_SLV0_ADDR, AK09916_ADDRESS); // write AK09916
     writeRegister8(3, ICM20948_I2C_SLV0_REG, reg); // define AK09916 register to be written to
     writeRegister8(3, ICM20948_I2C_SLV0_DO, val);
 }
 
 
-uint8_t ICM20948_WE::readAK09916Register8(uint8_t reg){
+uint8_t ICM20948::readAK09916Register8(uint8_t reg){
     enableMagDataRead(reg, 0x01);
     enableMagDataRead(AK09916_HXL, 0x08);
     regVal = readRegister8(0, ICM20948_EXT_SLV_SENS_DATA_00);
     return regVal;
 }
 
-int16_t ICM20948_WE::readAK09916Register16(uint8_t reg){
+int16_t ICM20948::readAK09916Register16(uint8_t reg){
     int16_t regValue = 0;
     enableMagDataRead(reg, 0x02);
     regValue = readRegister16(0, ICM20948_EXT_SLV_SENS_DATA_00);
@@ -1004,25 +754,25 @@ int16_t ICM20948_WE::readAK09916Register16(uint8_t reg){
     return regValue;
 }
 
-void ICM20948_WE::reset_ICM20948(){
+void ICM20948::reset() {
     writeRegister8(0, ICM20948_PWR_MGMT_1, ICM20948_RESET);
     delay(10);  // wait for registers to reset
 }
 
-void ICM20948_WE::enableI2CMaster(){
+void ICM20948::enableI2CMaster(){
     writeRegister8(0, ICM20948_USER_CTRL, ICM20948_I2C_MST_EN); //enable I2C master
     writeRegister8(3, ICM20948_I2C_MST_CTRL, 0x07); // set I2C clock to 345.60 kHz
     delay(10);
 }
 
-void ICM20948_WE::i2cMasterReset(){
+void ICM20948::i2cMasterReset(){
     uint8_t regVal = readRegister8(0, ICM20948_USER_CTRL);
     regVal |= ICM20948_I2C_MST_RST;
     writeRegister8(0, ICM20948_USER_CTRL, regVal);
     delay(10);  
 }
 
-void ICM20948_WE::enableMagDataRead(uint8_t reg, uint8_t bytes){
+void ICM20948::enableMagDataRead(uint8_t reg, uint8_t bytes){
     writeRegister8(3, ICM20948_I2C_SLV0_ADDR, AK09916_ADDRESS | AK09916_READ); // read AK09916
     writeRegister8(3, ICM20948_I2C_SLV0_REG, reg); // define AK09916 register to be read
     writeRegister8(3, ICM20948_I2C_SLV0_CTRL, 0x80 | bytes); //enable read | number of byte

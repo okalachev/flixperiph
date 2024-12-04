@@ -25,8 +25,7 @@
  * 
  ******************************************************************************/
 
-#ifndef ICM20948_WE_H_
-#define ICM20948_WE_H_
+#pragma once
 
 #if (ARDUINO >= 100)
  #include "Arduino.h"
@@ -36,7 +35,8 @@
 
 #include <Wire.h>
 #include <SPI.h>
-#include "xyzFloat.h"
+#include "IMU.h"
+#include "logger.h"
 
 /* Enums */
 
@@ -106,15 +106,11 @@ typedef enum AK09916_OP_MODE {
     AK09916_CONT_MODE_100HZ    = 0x08
 } AK09916_opMode;
 
-typedef enum ICM20948_ORIENTATION {
-  ICM20948_FLAT, ICM20948_FLAT_1, ICM20948_XY, ICM20948_XY_1, ICM20948_YX, ICM20948_YX_1
-} ICM20948_orientation;
-
-class ICM20948_WE
+class ICM20948 : public IMUInterface, public Logger
 {
-    public: 
+    public:
         /* constants */
-        
+
         static constexpr uint8_t AK09916_ADDRESS              {0x0C};
 
         /* Registers ICM20948 USER BANK 0*/
@@ -240,23 +236,14 @@ class ICM20948_WE
         
         /* Constructors */
     
-        ICM20948_WE(uint8_t addr = 0x68) : _wire{&Wire}, i2cAddress{addr}, useSPI{false} {}
-        ICM20948_WE(TwoWire *w, uint8_t addr = 0x68) : _wire{w}, i2cAddress{addr}, useSPI{false} {}
-        ICM20948_WE(int cs, bool spi) : _spi{&SPI}, csPin{cs}, useSPI{spi} {}
-        ICM20948_WE(SPIClass *s, int cs, bool spi) : _spi{s}, csPin{cs}, useSPI{spi} {} 
-    
-   
+        ICM20948(uint8_t addr = 0x68) : _wire{&Wire}, i2cAddress{addr}, useSPI{false} {}
+        ICM20948(TwoWire *w, uint8_t addr = 0x68) : _wire{w}, i2cAddress{addr}, useSPI{false} {}
+        ICM20948(SPIClass& s, int cs = -1) : _spi{&s}, csPin{cs}, useSPI{true} {}
        /* Basic settings */
 
-        bool init();
-        void autoOffsets();
-        void setAccOffsets(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax);
-        void setAccOffsets(xyzFloat offset); // for writing back previous offsets
-		xyzFloat getAccOffsets();
-		void setGyrOffsets(float xOffset, float yOffset, float zOffset);    
-        void setGyrOffsets(xyzFloat offset); // for writing back previous offsets
-        xyzFloat getGyrOffsets();
-		uint8_t whoAmI();
+        bool begin() override;
+        void reset() override;
+        uint8_t whoAmI() override;
         void enableAcc(bool enAcc);
         void setAccRange(ICM20948_accRange accRange);
         void setAccDLPF(ICM20948_dlpf dlpf); 
@@ -267,35 +254,20 @@ class ICM20948_WE
         void setGyrSampleRateDivider(uint8_t gyrSplRateDiv);
         void setTempDLPF(ICM20948_dlpf dlpf);
         void setI2CMstSampleRate(uint8_t rateExp);
-        void setSPIClockSpeed(unsigned long clock);   
-        
-        
-        /* x,y,z results */
-        
-        void readSensor(); 
-        xyzFloat getAccRawValues();
-        xyzFloat getCorrectedAccRawValues();
-        xyzFloat getGValues();
-        xyzFloat getAccRawValuesFromFifo();
-        xyzFloat getCorrectedAccRawValuesFromFifo();
-        xyzFloat getGValuesFromFifo();
-        float getResultantG(xyzFloat gVal); 
-        float getTemperature();
-        xyzFloat getGyrRawValues();
-        xyzFloat getCorrectedGyrRawValues();
-        xyzFloat getGyrValues(); 
-        xyzFloat getGyrValuesFromFifo();
-        xyzFloat getMagValues();
-        
-            
-        /* Angles and Orientation */ 
-        
-        xyzFloat getAngles();
-        ICM20948_orientation getOrientation();
-        String getOrientationAsString();
-        float getPitch();
-        float getRoll();
-        
+        void setSPIClockSpeed(unsigned long clock);
+
+        bool setRate(Rate rate) override;
+
+        const char* getModel() const override { return "ICM20948"; }
+
+        /* Results */
+
+        bool read() override;
+        void waitForData() override;
+       	void getAccel(float& x, float& y, float& z) const override;
+        float getTemp() const override;
+        void getGyro(float& x, float& y, float& z) const override;
+        void getMag(float& x, float& y, float& z) const override;
         
         /* Power, Sleep, Standby */ 
         
@@ -344,10 +316,7 @@ class ICM20948_WE
         SPISettings mySPISettings;
         uint8_t i2cAddress;
         uint8_t currentBank;
-        uint8_t buffer[20]; 
-        xyzFloat accOffsetVal;
-        xyzFloat accCorrFactor;
-        xyzFloat gyrOffsetVal;
+        uint8_t buffer[20];
         uint8_t accRangeFactor;
         uint8_t gyrRangeFactor;
         uint8_t regVal;   // intermediate storage of register values
@@ -355,23 +324,17 @@ class ICM20948_WE
         int csPin;
         bool useSPI;
         void setClockToAutoSelect();
-        xyzFloat correctAccRawValues(xyzFloat accRawVal);
-        xyzFloat correctGyrRawValues(xyzFloat gyrRawVal);
         void switchBank(uint8_t newBank);
         void writeRegister8(uint8_t bank, uint8_t reg, uint8_t val);
         void writeRegister16(uint8_t bank, uint8_t reg, int16_t val);
         uint8_t readRegister8(uint8_t bank, uint8_t reg);
         int16_t readRegister16(uint8_t bank, uint8_t reg);
         void readAllData(uint8_t* data);
-        xyzFloat readICM20948xyzValFromFifo();
         void writeAK09916Register8(uint8_t reg, uint8_t val);
         uint8_t readAK09916Register8(uint8_t reg);
         int16_t readAK09916Register16(uint8_t reg);
-        void reset_ICM20948();
         void enableI2CMaster();
         void i2cMasterReset();
         void enableMagDataRead(uint8_t reg, uint8_t bytes);
 
 };
-
-#endif

@@ -109,7 +109,7 @@ class MPU9250 : public IMUInterface, public Logger {
   inline float mag_y_ut() const {return mag_[1];}
   inline float mag_z_ut() const {return mag_[2];}
   inline float getTemp() const override {return temp_;}
-  inline uint8_t whoAmI() const override {return who_am_i_;}
+  inline uint8_t whoAmI() override {return who_am_i_;}
 
  private:
   InvensenseImu imu_;

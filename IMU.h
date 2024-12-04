@@ -45,7 +45,7 @@ public:
 
 	virtual bool begin() = 0;
 	virtual void reset() = 0;
-	virtual uint8_t whoAmI() const = 0;
+	virtual uint8_t whoAmI() = 0;
 	virtual bool read() = 0;
 	virtual void waitForData() = 0;
 	virtual void getAccel(float& x, float& y, float& z) const = 0;
