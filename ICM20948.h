@@ -232,6 +232,7 @@ public:
 	void setGyrDLPF(ICM20948_dlpf dlpf);
 	void setGyrSampleRateDivider(uint8_t gyrSplRateDiv);
 	void setTempDLPF(ICM20948_dlpf dlpf);
+	bool setDLPF(const DLPF dlpf) override;
 	void setI2CMstSampleRate(uint8_t rateExp);
 	void setSPIClockSpeed(unsigned long clock);
 	bool setRate(const Rate rate) override;

@@ -11,10 +11,10 @@ public:
 	enum DLPF {
 		DLPF_OFF,
 		DLPF_MAX,
-		DLPF_BANDWIDTH_100HZ_APPROX,
-		DLPF_BANDWIDTH_50HZ_APPROX,
-		DLPF_BANDWIDTH_5HZ_APPROX,
-		DLPF_BANDWIDTH_MIN
+		DLPF_100HZ_APPROX,
+		DLPF_50HZ_APPROX,
+		DLPF_5HZ_APPROX,
+		DLPF_MIN
 	};
 	enum AccelRange {
 		ACCEL_RANGE_MIN,
@@ -39,7 +39,6 @@ public:
 		RATE_8KHZ_APPROX,
 		RATE_MAX
 	};
-
 	virtual bool begin() = 0;
 	virtual void reset() = 0;
 	virtual uint8_t whoAmI() = 0;
@@ -52,5 +51,6 @@ public:
 	virtual bool setRate(const Rate rate) = 0;
 	virtual bool setAccelRange(const AccelRange range) = 0;
 	virtual bool setGyroRange(const GyroRange range) = 0;
+	virtual bool setDLPF(const DLPF dlpf) = 0;
 	virtual const char* getModel() const = 0;
 };

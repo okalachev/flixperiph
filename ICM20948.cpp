@@ -169,6 +169,48 @@ void ICM20948::setTempDLPF(ICM20948_dlpf dlpf) {
 	writeRegister8(2, ICM20948_TEMP_CONFIG, dlpf);
 }
 
+bool ICM20948::setDLPF(const DLPF dlpf) {
+	/*  ICMD20948 DLPF table:
+	 *
+	 *  DLPF       3dB Bandwidth [Hz]      Output Rate [Hz]
+     *    0              246.0               1125/(1+ASRD) (default)
+     *    1              246.0               1125/(1+ASRD)
+     *    2              111.4               1125/(1+ASRD)
+     *    3               50.4               1125/(1+ASRD)
+     *    4               23.9               1125/(1+ASRD)
+     *    5               11.5               1125/(1+ASRD)
+     *    6                5.7               1125/(1+ASRD)
+     *    7              473.0               1125/(1+ASRD)
+     *    OFF           1209.0               4500
+     *
+     *    ASRD = Accelerometer Sample Rate Divider (0...4095)
+	 */
+	ICM20948_dlpf val;
+	switch (dlpf) {
+		case DLPF_OFF:
+			val = ICM20948_DLPF_OFF;
+			break;
+		case DLPF_MAX:
+			val = ICM20948_DLPF_7;
+			break;
+		case DLPF_100HZ_APPROX:
+			val = ICM20948_DLPF_2;
+			break;
+		case DLPF_50HZ_APPROX:
+			val = ICM20948_DLPF_3;
+			break;
+		case DLPF_MIN:
+		case DLPF_5HZ_APPROX:
+			val = ICM20948_DLPF_6;
+			break;
+		default:
+			log("Unsupported DLPF setting");
+			return false;
+	}
+	setAccDLPF(val);
+	setGyrDLPF(val);
+}
+
 void ICM20948::setI2CMstSampleRate(uint8_t rateExp) {
 	if(rateExp < 16){
 		writeRegister8(3, ICM20948_I2C_MST_ODR_CFG, rateExp);

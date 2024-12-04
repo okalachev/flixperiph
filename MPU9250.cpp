@@ -300,6 +300,26 @@ bool MPU9250::setSrd(const uint8_t srd) {
   srd_ = srd;
   return true;
 }
+bool MPU9250::setDLPF(const DLPF dlpf) {
+  DlpfBandwidth val;
+  switch (dlpf) {
+    case DLPF_OFF:
+    case DLPF_MAX:
+      val = DLPF_BANDWIDTH_184HZ;
+      break;
+    case DLPF_100HZ_APPROX:
+      val = DLPF_BANDWIDTH_92HZ;
+      break;
+    case DLPF_50HZ_APPROX:
+      val = DLPF_BANDWIDTH_41HZ;
+      break;
+    case DLPF_MIN:
+    case DLPF_5HZ_APPROX:
+      val = DLPF_BANDWIDTH_5HZ;
+      break;
+  }
+  return setDlpfBandwidth(val);
+}
 bool MPU9250::setDlpfBandwidth(const DlpfBandwidth dlpf) {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Check input is valid and set requested dlpf */

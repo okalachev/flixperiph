@@ -86,6 +86,7 @@ class MPU9250 : public IMUInterface, public Logger {
   inline GyroRange gyro_range() const {return gyro_range_;}
   bool setSrd(const uint8_t srd);
   inline uint8_t srd() const {return srd_;}
+  bool setDLPF(const DLPF dlpf) override;
   bool setDlpfBandwidth(const DlpfBandwidth dlpf);
   inline DlpfBandwidth dlpf_bandwidth() const {return dlpf_bandwidth_;}
   bool enableWom(int16_t threshold_mg, const WomRate wom_rate);
