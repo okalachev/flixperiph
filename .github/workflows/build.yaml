@@ -21,7 +21,7 @@ jobs:
       run: arduino-cli core update-index --config-file arduino-cli.yaml && arduino-cli core install esp8266:esp8266 --config-file arduino-cli.yaml
     - name: Install AVR core
       run: arduino-cli core install arduino:avr
-    - name: Zip and install library
+    - name: Zip library
       run: cd .. && zip -r FlixPeriph.zip . -x .git/\*
     - name: Install library
       run: arduino-cli lib install --zip-path ../FlixPeriph.zip --config-file arduino-cli.yaml
