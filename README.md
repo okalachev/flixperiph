@@ -48,6 +48,23 @@ Notice, that MPU6500 does not include a magnetometer, so magnetometer data will 
 
 You can also use `<MPU6500.h>` header and `MPU6500` class, which is an alias for `MPU9250` class.
 
+#### I²C
+
+In case of using I²C connection (not recommended), the initialization would look like this:
+
+```cpp
+#include <MPU9250.h>
+#include <Wire.h>
+
+MPU9250 IMU(Wire); // the default address is used automatically
+
+void setup() {
+  Wire.begin();
+  Wire.setClock(400000); // 400 kHz I²C clock
+  IMU.begin();
+}
+```
+
 ### ICM-20948
 
 The ICM-20948 IMU driver has the same interface. Only the declaration is changed in the example above:

@@ -69,12 +69,10 @@ class MPU9250 : public IMUInterface, public Logger {
     WOM_RATE_500HZ = 0x0B
   };
   MPU9250() {}
-  MPU9250(TwoWire *i2c, const I2cAddr addr) :
-          imu_(i2c, static_cast<uint8_t>(addr)) {}
-  MPU9250(SPIClass *spi, const uint8_t cs = 255) :
-          imu_(spi, cs) {}
-  MPU9250(SPIClass& spi, const uint8_t cs = 255) :
-          imu_(&spi, cs) {}
+  MPU9250(TwoWire *i2c, const I2cAddr addr) : imu_(i2c, static_cast<uint8_t>(addr)) {}
+  MPU9250(TwoWire& i2c, const I2cAddr addr = I2C_ADDR_PRIM) : imu_(&i2c, static_cast<uint8_t>(addr)) {}
+  MPU9250(SPIClass *spi, const uint8_t cs = 255) : imu_(spi, cs) {}
+  MPU9250(SPIClass& spi, const uint8_t cs = 255) : imu_(&spi, cs) {}
   void config(TwoWire *i2c, const I2cAddr addr);
   void config(SPIClass *spi, const uint8_t cs);
   bool begin() override;
