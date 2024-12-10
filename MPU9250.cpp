@@ -453,20 +453,20 @@ bool MPU9250::read() {
       new_mag_data_ = false;
     }
   }
-  /* Convert to float values and rotate the accel / gyro axis */
-  accel_[0] = static_cast<float>(accel_cnts_[1]) * accel_scale_ * G_MPS2_;
-  accel_[1] = static_cast<float>(accel_cnts_[0]) * accel_scale_ * G_MPS2_;
-  accel_[2] = static_cast<float>(accel_cnts_[2]) * accel_scale_ * -1.0f *
-              G_MPS2_;
+  /* Convert to float values */
+  accel_[0] = static_cast<float>(accel_cnts_[0]) * accel_scale_ * G_MPS2_;
+  accel_[1] = static_cast<float>(accel_cnts_[1]) * accel_scale_ * G_MPS2_;
+  accel_[2] = static_cast<float>(accel_cnts_[2]) * accel_scale_ * G_MPS2_;
   temp_ = (static_cast<float>(temp_cnts_) - 21.0f) / TEMP_SCALE_ + 21.0f;
-  gyro_[0] = static_cast<float>(gyro_cnts_[1]) * gyro_scale_ * DEG2RAD_;
-  gyro_[1] = static_cast<float>(gyro_cnts_[0]) * gyro_scale_ * DEG2RAD_;
-  gyro_[2] = static_cast<float>(gyro_cnts_[2]) * gyro_scale_ * -1.0f * DEG2RAD_;
+  gyro_[0] = static_cast<float>(gyro_cnts_[0]) * gyro_scale_ * DEG2RAD_;
+  gyro_[1] = static_cast<float>(gyro_cnts_[1]) * gyro_scale_ * DEG2RAD_;
+  gyro_[2] = static_cast<float>(gyro_cnts_[2]) * gyro_scale_ * DEG2RAD_;
   /* Only update on new data */
   if (new_mag_data_) {
-    mag_[0] =   static_cast<float>(mag_cnts_[0]) * mag_scale_[0];
-    mag_[1] =   static_cast<float>(mag_cnts_[1]) * mag_scale_[1];
-    mag_[2] =   static_cast<float>(mag_cnts_[2]) * mag_scale_[2];
+    /* Orient magnetometer axes to match accel and gyro */
+    mag_[0] =   static_cast<float>(mag_cnts_[1]) * mag_scale_[0];
+    mag_[1] =   static_cast<float>(mag_cnts_[0]) * mag_scale_[1];
+    mag_[2] =   static_cast<float>(mag_cnts_[2]) * mag_scale_[2] * -1.0f;
   }
   return true;
 }

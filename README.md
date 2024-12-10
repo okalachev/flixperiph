@@ -75,6 +75,14 @@ The ICM-20948 IMU driver has the same interface. Only the declaration is changed
 ICM20948 IMU(SPI);
 ```
 
+### IMU axes orientation
+
+Orientation of the IMU axes (including magnetometer) on various boards:
+
+|GY-91|MPU-9265|ICM-20948|
+|-|-|-|
+|<img src="img/gy91-axes.svg" width="200" alt="GY-91 axes orientation">|<img src="img/mpu9265-axes.svg" width="200" alt="MPU-9265 axes orientation">|<img src="img/icm20948-axes.svg" width="200" alt="ICM-20948 axes orientation">|
+
 ### Connection
 
 Connecting GY-91 board to ESP32 using VSPI:
