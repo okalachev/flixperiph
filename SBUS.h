@@ -45,12 +45,9 @@ struct SBUSData {
 class SBUS {
  public:
 	#if defined(ESP32)
-	SBUS(HardwareSerial& bus, const int8_t rxpin, const int8_t txpin, const bool inv) : uart_(&bus), inv_(inv), rxpin_(rxpin), txpin_(txpin) {}
-	SBUS(HardwareSerial& bus, const int8_t rxpin, const int8_t txpin, const bool inv, const bool fast) : uart_(&bus), inv_(inv), fast_(fast), rxpin_(rxpin), txpin_(txpin) {}
+	SBUS(HardwareSerial& bus, const int rxpin, const int txpin, const bool inv = true, const bool fast = false) : uart_(&bus), inv_(inv), fast_(fast), rxpin_(rxpin), txpin_(txpin) {}
 	#endif
-	explicit SBUS(HardwareSerial& bus) : uart_(&bus) {}
-	SBUS(HardwareSerial& bus, const bool inv) : uart_(&bus), inv_(inv) {}
-	SBUS(HardwareSerial& bus, const bool inv, const bool fast) : uart_(&bus), inv_(inv), fast_(fast) {}
+	explicit SBUS(HardwareSerial& bus, const bool inv = true, const bool fast = false) : uart_(&bus), inv_(inv), fast_(fast) {}
 	void begin();
 	bool read();
 	inline SBUSData data() const {return data_;}
@@ -92,12 +89,9 @@ class SBUS {
 class SBUSTx {
  public:
 	#if defined(ESP32)
-	SBUSTx(HardwareSerial& bus, const int8_t rxpin, const int8_t txpin, const bool inv) : uart_(&bus), inv_(inv), rxpin_(rxpin), txpin_(txpin) {}
-	SBUSTx(HardwareSerial& bus, const int8_t rxpin, const int8_t txpin, const bool inv, const bool fast) : uart_(&bus), inv_(inv), fast_(fast), rxpin_(rxpin), txpin_(txpin) {}
+	SBUSTx(HardwareSerial& bus, const int rxpin, const int txpin, const bool inv = true, const bool fast = false) : uart_(&bus), inv_(inv), fast_(fast), rxpin_(rxpin), txpin_(txpin) {}
 	#endif
-	explicit SBUSTx(HardwareSerial& bus) : uart_(&bus) {}
-	SBUSTx(HardwareSerial& bus, const bool inv) : uart_(&bus), inv_(inv) {}
-	SBUSTx(HardwareSerial& bus, const bool inv, const bool fast) : uart_(&bus), inv_(inv), fast_(fast) {}
+	explicit SBUSTx(HardwareSerial& bus, const bool inv = true, const bool fast = false) : uart_(&bus), inv_(inv), fast_(fast) {}
 	void begin();
 	void write();
 	inline void data(const SBUSData &data) {data_ = data;}
