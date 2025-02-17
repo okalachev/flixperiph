@@ -222,6 +222,7 @@ public:
 	void reset() override;
 	uint8_t whoAmI() override;
 	const char* getModel() const override { return "ICM20948"; }
+	inline int status() const override { return _status; }
 	void enableAcc(bool enAcc);
 	bool setAccelRange(const AccelRange range) override;
 	void setAccRange(ICM20948_accRange accRange);
@@ -291,6 +292,7 @@ protected:
 	uint8_t gyrRangeFactor;
 	uint8_t regVal; // intermediate storage of register values
 	ICM20948_fifoType fifoType;
+	int _status;
 	int csPin;
 	bool useSPI;
 	void setClockToAutoSelect();

@@ -41,6 +41,7 @@ public:
 	};
 	virtual bool begin() = 0;
 	virtual void reset() = 0;
+	virtual int status() const = 0; // 0 - success, otherwise error
 	virtual uint8_t whoAmI() = 0;
 	virtual bool read() = 0;
 	virtual void waitForData() = 0;

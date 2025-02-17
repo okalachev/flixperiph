@@ -104,6 +104,7 @@ class MPU9250 : public IMUInterface, public Logger {
   inline bool new_mag_data() const {return new_mag_data_;}
   inline float getTemp() const override {return temp_;}
   inline uint8_t whoAmI() override {return who_am_i_;}
+  inline int status() const override {return status_;}
 
  private:
   InvensenseImu imu_;
@@ -131,6 +132,7 @@ class MPU9250 : public IMUInterface, public Logger {
   static constexpr float G_MPS2_ = 9.80665f;
   static constexpr float DEG2RAD_ = 3.14159265358979323846264338327950288f /
                                     180.0f;
+  int status_ = 0;
   bool is_mpu6500_ = false;
   bool new_imu_data_, new_mag_data_;
   bool mag_sensor_overflow_;

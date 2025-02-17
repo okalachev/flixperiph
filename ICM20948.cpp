@@ -32,6 +32,7 @@ bool ICM20948::begin() {
 	if (whoAmI() != ICM20948_WHO_AM_I_CONTENT) {
 		delay(2000);
 		if (whoAmI() != ICM20948_WHO_AM_I_CONTENT){
+			_status = 1;
 			log("Error: incorrect WHO_AM_I value: 0x%02X", whoAmI());
 			return false;
 		}
@@ -256,6 +257,7 @@ bool ICM20948::read() {
 }
 
 void ICM20948::waitForData() {
+	if (_status) return; // don't wait if there's an error
 	const static uint8_t RAW_DATA_0_RDY_INT = 0x01;
 	while (true) {
 		uint8_t intStatus1 = readRegister8(0, ICM20948_INT_STATUS_1);

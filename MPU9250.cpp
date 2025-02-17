@@ -49,17 +49,17 @@ bool MPU9250::begin() {
   spi_clock_ = SPI_CFG_CLOCK_;
   /* Select clock source to gyro */
   if (!WriteRegister(PWR_MGMNT_1_, CLKSEL_PLL_)) {
-    log(errorFmt, 1);
+    log(errorFmt, status_ = 1);
     return false;
   }
   /* Enable I2C master mode */
   if (!WriteRegister(USER_CTRL_, I2C_MST_EN_)) {
-    log(errorFmt, 2);
+    log(errorFmt, status_ = 2);
     return false;
   }
   /* Set the I2C bus speed to 400 kHz */
   if (!WriteRegister(I2C_MST_CTRL_, I2C_MST_CLK_)) {
-    log(errorFmt, 3);
+    log(errorFmt, status_ = 3);
     return false;
   }
   /* Reset the MPU9250 */
@@ -68,7 +68,7 @@ bool MPU9250::begin() {
   delay(1);
   /* Check the WHO AM I byte */
   if (!ReadRegisters(WHOAMI_, sizeof(who_am_i_), &who_am_i_)) {
-    log(errorFmt, 4);
+    log(errorFmt, status_ = 4);
     return false;
   }
   if (who_am_i_ == WHOAMI_MPU6500) {
@@ -80,6 +80,7 @@ bool MPU9250::begin() {
   } else if (who_am_i_ == WHOAMI_MPU9255) {
     log("MPU-9255 detected");
   } else {
+    status_ = 5;
     log("Unknown WHO_AM_I: 0x%02X", who_am_i_);
     return false;
   }
@@ -89,44 +90,45 @@ bool MPU9250::begin() {
   WriteAk8963Register(AK8963_CNTL2_, AK8963_RESET_);
   /* Select clock source to gyro */
   if (!WriteRegister(PWR_MGMNT_1_, CLKSEL_PLL_)) {
-    log(errorFmt, 5);
+    log(errorFmt, status_ = 6);
     return false;
   }
   /* Enable I2C master mode */
   if (!WriteRegister(USER_CTRL_, I2C_MST_EN_)) {
-    log(errorFmt, 6);
+    log(errorFmt, status_ = 7);
     return false;
   }
   /* Set the I2C bus speed to 400 kHz */
   if (!WriteRegister(I2C_MST_CTRL_, I2C_MST_CLK_)) {
-    log(errorFmt, 7);
+    log(errorFmt, status_ = 8);
     return false;
   }
   /* Check the AK8963 WHOAMI */
   if (!ReadAk8963Registers(AK8963_WHOAMI_, sizeof(who_am_i_ak8963_), &who_am_i_ak8963_)) {
-    log(errorFmt, 8);
+    log(errorFmt, status_ = 9);
     return false;
   }
   if (!is_mpu6500_ && who_am_i_ak8963_ != WHOAMI_AK8963) {
+    status_ = 10;
     log("Wrong AK8963 WHO_AM_I: 0x%02X", who_am_i_ak8963_);
     return false;
   }
   /* Get the magnetometer calibration */
   /* Set AK8963 to power down */
   if (!WriteAk8963Register(AK8963_CNTL1_, AK8963_PWR_DOWN_)) {
-    log(errorFmt, 9);
+    log(errorFmt, status_ = 11);
     return false;
   }
   delay(100);  // long wait between AK8963 mode changes
   /* Set AK8963 to FUSE ROM access */
   if (!WriteAk8963Register(AK8963_CNTL1_, AK8963_FUSE_ROM_)) {
-    log(errorFmt, 10);
+    log(errorFmt, status_ = 12);
     return false;
   }
   delay(100);  // long wait between AK8963 mode changes
   /* Read the AK8963 ASA registers and compute magnetometer scale factors */
   if (!ReadAk8963Registers(AK8963_ASA_, sizeof(asa_buff_), asa_buff_)) {
-    log(errorFmt, 11);
+    log(errorFmt, status_ = 13);
     return false;
   }
   mag_scale_[0] = ((static_cast<float>(asa_buff_[0]) - 128.0f)
@@ -137,38 +139,38 @@ bool MPU9250::begin() {
     / 256.0f + 1.0f) * 4912.0f / 32760.0f;
   /* Set AK8963 to power down */
   if (!WriteAk8963Register(AK8963_CNTL1_, AK8963_PWR_DOWN_)) {
-    log(errorFmt, 12);
+    log(errorFmt, status_ = 14);
     return false;
   }
   /* Set AK8963 to 16 bit resolution, 100 Hz update rate */
   if (!WriteAk8963Register(AK8963_CNTL1_, AK8963_CNT_MEAS2_)) {
-    log(errorFmt, 13);
+    log(errorFmt, status_ = 15);
     return false;
   }
   delay(100);  // long wait between AK8963 mode changes
   /* Select clock source to gyro */
   if (!WriteRegister(PWR_MGMNT_1_, CLKSEL_PLL_)) {
-    log(errorFmt, 14);
+    log(errorFmt, status_ = 16);
     return false;
   }
   /* Set the accel range to 16G by default */
   if (!setAccelRange(ACCEL_RANGE_16G)) {
-    log(errorFmt, 15);
+    log(errorFmt, status_ = 17);
     return false;
   }
   /* Set the gyro range to 2000DPS by default*/
   if (!setGyroRange(GYRO_RANGE_2000DPS)) {
-    log(errorFmt, 16);
+    log(errorFmt, status_ = 18);
     return false;
   }
   /* Set the DLPF to 184HZ by default */
   if (!setDlpfBandwidth(DLPF_BANDWIDTH_184HZ)) {
-    log(errorFmt, 17);
+    log(errorFmt, status_ = 19);
     return false;
   }
   /* Set the SRD to 0 by default */
   if (!setSrd(0)) {
-    log(errorFmt, 18);
+    log(errorFmt, status_ = 20);
     return false;
   }
   return true;
@@ -471,6 +473,7 @@ bool MPU9250::read() {
   return true;
 }
 void MPU9250::waitForData() {
+  if (status_) return; // don't wait if there's an error
   while (!read());
 }
 void MPU9250::getAccel(float& x, float& y, float& z) const {
