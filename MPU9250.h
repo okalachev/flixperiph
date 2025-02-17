@@ -68,6 +68,10 @@ class MPU9250 : public IMUInterface, public Logger {
     WOM_RATE_250HZ = 0x0A,
     WOM_RATE_500HZ = 0x0B
   };
+  static constexpr uint8_t WHOAMI_MPU6500 = 0x70;
+  static constexpr uint8_t WHOAMI_MPU9250 = 0x71;
+  static constexpr uint8_t WHOAMI_MPU9255 = 0x73;
+  static constexpr uint8_t WHOAMI_AK8963 = 0x48;
   MPU9250() {}
   MPU9250(TwoWire *i2c, const I2cAddr addr) : imu_(i2c, static_cast<uint8_t>(addr)) {}
   MPU9250(TwoWire& i2c, const I2cAddr addr = I2C_ADDR_PRIM) : imu_(&i2c, static_cast<uint8_t>(addr)) {}
@@ -123,10 +127,6 @@ class MPU9250 : public IMUInterface, public Logger {
   uint8_t asa_buff_[3];
   float mag_scale_[3];
   uint8_t who_am_i_, who_am_i_ak8963_;
-  static constexpr uint8_t WHOAMI_MPU6500_ = 0x70;
-  static constexpr uint8_t WHOAMI_MPU9250_ = 0x71;
-  static constexpr uint8_t WHOAMI_MPU9255_ = 0x73;
-  static constexpr uint8_t WHOAMI_AK8963_ = 0x48;
   /* Data */
   static constexpr float G_MPS2_ = 9.80665f;
   static constexpr float DEG2RAD_ = 3.14159265358979323846264338327950288f /

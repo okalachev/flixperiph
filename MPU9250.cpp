@@ -71,13 +71,13 @@ bool MPU9250::begin() {
     log(errorFmt, 4);
     return false;
   }
-  if (who_am_i_ == WHOAMI_MPU6500_) {
+  if (who_am_i_ == WHOAMI_MPU6500) {
     // disable AK8963 functions
     is_mpu6500_ = true;
     log("MPU-6500 detected");
-  } else if (who_am_i_ == WHOAMI_MPU9250_) {
+  } else if (who_am_i_ == WHOAMI_MPU9250) {
     log("MPU-9250 detected");
-  } else if (who_am_i_ == WHOAMI_MPU9255_) {
+  } else if (who_am_i_ == WHOAMI_MPU9255) {
     log("MPU-9255 detected");
   } else {
     log("Unknown WHO_AM_I: 0x%02X", who_am_i_);
@@ -107,7 +107,7 @@ bool MPU9250::begin() {
     log(errorFmt, 8);
     return false;
   }
-  if (!is_mpu6500_ && who_am_i_ak8963_ != WHOAMI_AK8963_) {
+  if (!is_mpu6500_ && who_am_i_ak8963_ != WHOAMI_AK8963) {
     log("Wrong AK8963 WHO_AM_I: 0x%02X", who_am_i_ak8963_);
     return false;
   }
@@ -505,9 +505,9 @@ bool MPU9250::setRate(const Rate rate) {
 }
 const char* MPU9250::getModel() const {
   switch (who_am_i_) {
-    case WHOAMI_MPU6500_: return "MPU-6500";
-    case WHOAMI_MPU9250_: return "MPU-9250";
-    case WHOAMI_MPU9255_: return "MPU-9255";
+    case WHOAMI_MPU6500: return "MPU-6500";
+    case WHOAMI_MPU9250: return "MPU-9250";
+    case WHOAMI_MPU9255: return "MPU-9255";
     default: return "UNKNOWN";
   }
 }

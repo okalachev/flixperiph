@@ -34,10 +34,10 @@ void loop() {
 }
 ```
 
-The library will detect IMU type (MPU-9250 or MPU-6500) automatically. You can use the following method to check the detected type:
+The library will detect IMU type (MPU-9250 or MPU-6500) automatically. You can use the `whoAmI()` method to check the IMU type:
 
 ```cpp
-if (IMU.isMPU6500()) {
+if (IMU.whoAmI() == IMU.WHOAMI_MPU6500) {
   // MPU6500 detected
 } else {
   // MPU9250 detected
