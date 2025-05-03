@@ -213,8 +213,6 @@ public:
 	static constexpr uint8_t ICM20948_I2C_MST_RST     {0x02};
 
 	/* Constructors */
-	ICM20948(uint8_t addr = 0x68) : _wire{&Wire}, i2cAddress{addr}, useSPI{false} {}
-	ICM20948(TwoWire *w, uint8_t addr = 0x68) : _wire{w}, i2cAddress{addr}, useSPI{false} {}
 	ICM20948(TwoWire& w, uint8_t addr = 0x68) : _wire{&w}, i2cAddress{addr}, useSPI{false} {}
 	ICM20948(SPIClass& s, int cs = -1) : _spi{&s}, csPin{cs}, useSPI{true} {}
 
