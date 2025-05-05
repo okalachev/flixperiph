@@ -3,9 +3,14 @@
 #include "Arduino.h"
 #include "Wire.h"
 #include "SPI.h"
+#include "logger.h"
+
+#ifdef ESP32
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#endif
 
 // IMU driver interface
-
 class IMUInterface {
 public:
 	enum DLPF {
@@ -50,8 +55,85 @@ public:
 	virtual void getMag(float& x, float& y, float& z) const = 0;
 	virtual float getTemp() const = 0;
 	virtual bool setRate(const Rate rate) = 0;
+	virtual float getRate() = 0;
 	virtual bool setAccelRange(const AccelRange range) = 0;
 	virtual bool setGyroRange(const GyroRange range) = 0;
 	virtual bool setDLPF(const DLPF dlpf) = 0;
 	virtual const char* getModel() const = 0;
+	virtual bool setupInterrupt() = 0;
+};
+
+// Base for all IMU drivers
+class IMUBase : public IMUInterface, public Logger {
+private:
+	bool usingInterrupt = false;
+
+#ifdef ESP32
+	SemaphoreHandle_t interruptSemaphore;
+	hw_timer_t *timer = NULL;
+
+	static void ARDUINO_ISR_ATTR interruptHandler(void *interruptSemaphore) {
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		xSemaphoreGiveFromISR((SemaphoreHandle_t)interruptSemaphore, &xHigherPriorityTaskWoken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+
+	bool setupInterruptTimer() {
+		interruptSemaphore = xSemaphoreCreateBinary();
+
+		float rate = getRate();
+		uint32_t frequency = 1000000;
+		uint64_t alarmValue = round(1000000 / rate);
+
+		if (timer != NULL) {
+			timerEnd(timer);
+		}
+
+		timer = timerBegin(frequency);
+		if (timer == NULL) {
+			log("Failed to create timer");
+			return false;
+		}
+
+		timerAttachInterruptArg(timer, IMUBase::interruptHandler, interruptSemaphore);
+		timerAlarm(timer, alarmValue, true, 0);
+		usingInterrupt = true;
+		return true;
+	}
+
+	bool setupInterruptPin(uint8_t pin) {
+		interruptSemaphore = xSemaphoreCreateBinary();
+		attachInterruptArg(pin, IMUBase::interruptHandler, interruptSemaphore, FALLING);
+		usingInterrupt = true;
+		return true;
+	}
+#else
+	bool setupInterruptTimer() { return false; }
+	bool setupInterruptPin(uint8_t pin) { return false; }
+#endif
+
+protected:
+	bool setupInterrupt(int pin = -1) {
+		if (usingInterrupt) return true; // already set
+
+		if (pin == -1) {
+			return setupInterruptTimer();
+		} else {
+			return setupInterruptPin(pin);
+		}
+	}
+
+public:
+	void waitForData() {
+		if (this->status()) return; // don't wait if there's an error
+
+		if (usingInterrupt) {
+#ifdef ESP32
+			xSemaphoreTake(interruptSemaphore, portMAX_DELAY); // wait using interrupt
+			this->read();
+#endif
+		} else {
+			while (!this->read()); // wait using polling
+		}
+	}
 };

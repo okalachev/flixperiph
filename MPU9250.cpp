@@ -35,6 +35,8 @@
 #include "core/core.h"
 #endif
 
+static const char *errorFmt = "Error: %d";
+
 void MPU9250::config(TwoWire *i2c, const I2cAddr addr) {
   imu_.Config(i2c, static_cast<uint8_t>(addr));
 }
@@ -43,7 +45,7 @@ void MPU9250::config(SPIClass *spi, const uint8_t cs) {
 }
 bool MPU9250::begin() {
   setLogName("IMU");
-  const char *errorFmt = "Error: %d";
+
   imu_.Begin();
   /* 1 MHz for config */
   spi_clock_ = SPI_CFG_CLOCK_;
@@ -472,10 +474,6 @@ bool MPU9250::read() {
   }
   return true;
 }
-void MPU9250::waitForData() {
-  if (status_) return; // don't wait if there's an error
-  while (!read());
-}
 void MPU9250::getAccel(float& x, float& y, float& z) const {
   x = accel_[0];
   y = accel_[1];
@@ -505,6 +503,21 @@ bool MPU9250::setRate(const Rate rate) {
       log("Unsupported rate setting");
       return false;
   }
+}
+float MPU9250::getRate() {
+  return 1000.0f / (srd_ + 1);
+}
+bool MPU9250::setupInterrupt() {
+  /* Set up interrupt */
+  if (int_pin_ != -1 && !enableDrdyInt()) {
+    log(errorFmt, status_ = 21);
+    return false;
+  }
+  if (!IMUBase::setupInterrupt(int_pin_)) {
+    log(errorFmt, status_ = 22);
+    return false;
+  }
+  return true;
 }
 const char* MPU9250::getModel() const {
   switch (who_am_i_) {

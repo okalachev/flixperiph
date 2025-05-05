@@ -84,8 +84,7 @@ typedef enum AK09916_OP_MODE {
 	AK09916_CONT_MODE_100HZ    = 0x08
 } AK09916_opMode;
 
-class ICM20948 : public IMUInterface, public Logger
-{
+class ICM20948 : public IMUBase {
 public:
 	/* constants */
 
@@ -213,8 +212,8 @@ public:
 	static constexpr uint8_t ICM20948_I2C_MST_RST     {0x02};
 
 	/* Constructors */
-	ICM20948(TwoWire& w, uint8_t addr = 0x68) : _wire{&w}, i2cAddress{addr}, useSPI{false} {}
-	ICM20948(SPIClass& s, int cs = -1) : _spi{&s}, csPin{cs}, useSPI{true} {}
+	ICM20948(TwoWire& w, int drdy = -1, uint8_t addr = 0x68) : _wire{&w}, intPin{drdy}, i2cAddress{addr}, useSPI{false} {}
+	ICM20948(SPIClass& s, int cs = -1, int drdy = -1) : _spi{&s}, csPin{cs}, intPin{drdy}, useSPI{true} {}
 
 	bool begin() override;
 	void reset() override;
@@ -236,10 +235,11 @@ public:
 	void setI2CMstSampleRate(uint8_t rateExp);
 	void setSPIClockSpeed(unsigned long clock);
 	bool setRate(const Rate rate) override;
+	float getRate() override;
+	bool setupInterrupt() override;
 
 	/* Results */
 	bool read() override;
-	void waitForData() override;
 	void getAccel(float& x, float& y, float& z) const override;
 	float getTemp() const override;
 	void getGyro(float& x, float& y, float& z) const override;
@@ -292,6 +292,7 @@ protected:
 	ICM20948_fifoType fifoType;
 	int _status;
 	int csPin;
+	int intPin;
 	bool useSPI;
 	void setClockToAutoSelect();
 	void switchBank(uint8_t newBank);
