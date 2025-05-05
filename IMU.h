@@ -106,7 +106,7 @@ private:
 	bool setupInterruptPin(uint8_t pin) {
 #ifdef ESP32
 		interruptSemaphore = xSemaphoreCreateBinary();
-		attachInterruptArg(pin, _interruptHandler, interruptSemaphore, RISING);
+		attachInterruptArg(pin, _interruptHandler, interruptSemaphore, FALLING);
 		usingInterrupt = true;
 		return true;
 #else
