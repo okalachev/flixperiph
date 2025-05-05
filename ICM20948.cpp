@@ -249,22 +249,25 @@ bool ICM20948::setRate(const Rate rate) {
 	}
 }
 
+float ICM20948::getRate() {
+	uint8_t srdGyro = readRegister8(2, ICM20948_GYRO_SMPLRT_DIV);
+	uint8_t srdAcc = readRegister8(2, ICM20948_ACCEL_SMPLRT_DIV_1);
+	uint8_t srd = min(srdGyro, srdAcc);
+	return 1125.0 / (1 + srd);
+}
+
+bool ICM20948::setupInterrupt() {
+	if (intPin == -1) {
+		enableInterrupt(ICM20948_DATA_READY_INT);
+	}
+	return IMUBase::setupInterrupt(intPin);
+}
+
 /************* Results *************/
 
 bool ICM20948::read() {
 	readAllData(buffer);
 	return true;
-}
-
-void ICM20948::waitForData() {
-	if (_status) return; // don't wait if there's an error
-	const static uint8_t RAW_DATA_0_RDY_INT = 0x01;
-	while (true) {
-		uint8_t intStatus1 = readRegister8(0, ICM20948_INT_STATUS_1);
-		bool dataReady = intStatus1 & RAW_DATA_0_RDY_INT;
-		if (dataReady) break;
-	}
-	read();
 }
 
 void ICM20948::getAccel(float& x, float& y, float& z) const {

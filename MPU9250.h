@@ -39,7 +39,7 @@
 #include "invensense_imu.h"  // NOLINT
 #include "logger.h"
 
-class MPU9250 : public IMUInterface, public Logger {
+class MPU9250 : public IMUBase {
  public:
   /* Sensor and filter settings */
   enum I2cAddr : uint8_t {
@@ -73,10 +73,8 @@ class MPU9250 : public IMUInterface, public Logger {
   static constexpr uint8_t WHOAMI_MPU9255 = 0x73;
   static constexpr uint8_t WHOAMI_AK8963 = 0x48;
   MPU9250() {}
-  MPU9250(TwoWire *i2c, const I2cAddr addr) : imu_(i2c, static_cast<uint8_t>(addr)) {}
-  MPU9250(TwoWire& i2c, const I2cAddr addr = I2C_ADDR_PRIM) : imu_(&i2c, static_cast<uint8_t>(addr)) {}
-  MPU9250(SPIClass *spi, const uint8_t cs = 255) : imu_(spi, cs) {}
-  MPU9250(SPIClass& spi, const uint8_t cs = 255) : imu_(&spi, cs) {}
+  MPU9250(TwoWire& i2c, int drdy = -1, I2cAddr addr = I2C_ADDR_PRIM) : imu_(&i2c, static_cast<uint8_t>(addr)), int_pin_(drdy) {}
+  MPU9250(SPIClass& spi, int cs = -1, int drdy = -1) : imu_(&spi, cs), int_pin_(drdy) {}
   void config(TwoWire *i2c, const I2cAddr addr);
   void config(SPIClass *spi, const uint8_t cs);
   bool begin() override;
@@ -94,12 +92,13 @@ class MPU9250 : public IMUInterface, public Logger {
   bool enableWom(int16_t threshold_mg, const WomRate wom_rate);
   void reset() override;
   bool read() override;
-  void waitForData() override;
   void getAccel(float& x, float& y, float& z) const override;
   void getGyro(float& x, float& y, float& z) const override;
   void getMag(float& x, float& y, float& z) const override;
   bool setRate(const Rate rate) override;
+  float getRate() override;
   const char* getModel() const override;
+  bool setupInterrupt() override;
   inline bool new_imu_data() const {return new_imu_data_;}
   inline bool new_mag_data() const {return new_mag_data_;}
   inline float getTemp() const override {return temp_;}
@@ -133,6 +132,7 @@ class MPU9250 : public IMUInterface, public Logger {
   static constexpr float DEG2RAD_ = 3.14159265358979323846264338327950288f /
                                     180.0f;
   int status_ = 0;
+  int int_pin_ = -1;
   bool is_mpu6500_ = false;
   bool new_imu_data_, new_mag_data_;
   bool mag_sensor_overflow_;
