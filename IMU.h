@@ -63,24 +63,22 @@ public:
 	virtual bool setupInterrupt() = 0;
 };
 
-static void ARDUINO_ISR_ATTR _interruptHandler(void *taskHandle) {
+static void ARDUINO_ISR_ATTR _interruptHandler(void *interruptSemaphore) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	vTaskNotifyGiveFromISR(*(TaskHandle_t *)taskHandle, &xHigherPriorityTaskWoken);
-	if (xHigherPriorityTaskWoken == pdTRUE) {
-		portYIELD_FROM_ISR();
-	}
+	xSemaphoreGiveFromISR((SemaphoreHandle_t)interruptSemaphore, &xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 // Base for all IMU drivers
 class IMUBase : public IMUInterface, public Logger {
 private:
 	bool usingInterrupt = false;
-	TaskHandle_t taskHandle;
+	SemaphoreHandle_t interruptSemaphore;
 	hw_timer_t *timer = NULL;
 
 	bool setupInterruptTimer() {
 #ifdef ESP32
-		taskHandle = xTaskGetCurrentTaskHandle();
+		interruptSemaphore = xSemaphoreCreateBinary();
 
 		float rate = getRate();
 		uint32_t frequency = 1000000;
@@ -96,7 +94,7 @@ private:
 			return false;
 		}
 
-		timerAttachInterruptArg(timer, &_interruptHandler, &taskHandle);
+		timerAttachInterruptArg(timer, _interruptHandler, interruptSemaphore);
 		timerAlarm(timer, alarmValue, true, 0);
 		usingInterrupt = true;
 		return true;
@@ -107,8 +105,8 @@ private:
 
 	bool setupInterruptPin(uint8_t pin) {
 #ifdef ESP32
-		taskHandle = xTaskGetCurrentTaskHandle();
-		attachInterruptArg(pin, &_interruptHandler, &taskHandle, RISING);
+		interruptSemaphore = xSemaphoreCreateBinary();
+		attachInterruptArg(pin, _interruptHandler, interruptSemaphore, RISING);
 		usingInterrupt = true;
 		return true;
 #else
@@ -133,8 +131,7 @@ public:
 
 		if (usingInterrupt) {
 #ifdef ESP32
-			// wait for interrupt
-			ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+			xSemaphoreTake(interruptSemaphore, portMAX_DELAY); // wait using interrupt
 			this->read();
 #endif
 		} else {
