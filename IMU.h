@@ -75,11 +75,12 @@ static void ARDUINO_ISR_ATTR _interruptHandler(void *interruptSemaphore) {
 class IMUBase : public IMUInterface, public Logger {
 private:
 	bool usingInterrupt = false;
+
+#ifdef ESP32
 	SemaphoreHandle_t interruptSemaphore;
 	hw_timer_t *timer = NULL;
 
 	bool setupInterruptTimer() {
-#ifdef ESP32
 		interruptSemaphore = xSemaphoreCreateBinary();
 
 		float rate = getRate();
@@ -100,21 +101,18 @@ private:
 		timerAlarm(timer, alarmValue, true, 0);
 		usingInterrupt = true;
 		return true;
-#else
-		return false;
-#endif
 	}
 
 	bool setupInterruptPin(uint8_t pin) {
-#ifdef ESP32
 		interruptSemaphore = xSemaphoreCreateBinary();
 		attachInterruptArg(pin, _interruptHandler, interruptSemaphore, FALLING);
 		usingInterrupt = true;
 		return true;
-#else
-		return false;
-#endif
 	}
+#else
+	bool setupInterruptTimer() { return false; }
+	bool setupInterruptPin(uint8_t pin) { return false; }
+#endif
 
 protected:
 	bool setupInterrupt(int pin = -1) {
