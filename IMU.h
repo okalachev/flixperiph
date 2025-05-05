@@ -63,11 +63,13 @@ public:
 	virtual bool setupInterrupt() = 0;
 };
 
+#ifdef ESP32
 static void ARDUINO_ISR_ATTR _interruptHandler(void *interruptSemaphore) {
 	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	xSemaphoreGiveFromISR((SemaphoreHandle_t)interruptSemaphore, &xHigherPriorityTaskWoken);
 	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
+#endif
 
 // Base for all IMU drivers
 class IMUBase : public IMUInterface, public Logger {
