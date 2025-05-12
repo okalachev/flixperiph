@@ -30,14 +30,20 @@ bool ICM20948::begin() {
 	}
 	currentBank = 0;
 
-	reset();
-	if (whoAmI() != ICM20948_WHO_AM_I_CONTENT) {
-		delay(2000);
-		if (whoAmI() != ICM20948_WHO_AM_I_CONTENT){
-			_status = 1;
-			log("Error: incorrect WHO_AM_I value: 0x%02X", whoAmI());
+	// Check WHO_AM_I with 10 attempts
+	int attempt = 0;
+	while (true) {
+		log("Attempt to check WHO_AM_I");
+		reset();
+		uint8_t whoami = whoAmI();
+		if (whoami == ICM20948_WHO_AM_I_CONTENT) {
+			break;
+		}
+		if (attempt++ > 10) {
+			log("incorrect WHO_AM_I value: 0x%02X", whoami);
 			return false;
 		}
+		delay(200);
 	}
 
 	accRangeFactor = 1.0;
