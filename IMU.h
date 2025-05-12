@@ -124,7 +124,7 @@ protected:
 	}
 
 public:
-	void waitForData() {
+	void waitForData() override {
 		if (this->status()) return; // don't wait if there's an error
 
 		if (usingInterrupt) {

@@ -12,6 +12,8 @@
 /************ Basic Settings ************/
 
 bool ICM20948::begin() {
+	setLogName("IMU");
+
 	if (useSPI) {
 		_spi->begin();
 		if (csPin == -1) {
