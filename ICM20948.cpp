@@ -265,10 +265,15 @@ float ICM20948::getRate() {
 }
 
 bool ICM20948::setupInterrupt() {
-	if (intPin == -1) {
+	bool res = IMUBase::setupInterrupt(intPin);
+	if (intPin != -1 && res) {
+		setIntPinPolarity(ICM20948_ACT_LOW);
+		enableClearIntByAnyRead(true);
+		enableIntLatch(false);
 		enableInterrupt(ICM20948_DATA_READY_INT);
+		readAndClearInterrupts();
 	}
-	return IMUBase::setupInterrupt(intPin);
+	return res;
 }
 
 /************* Results *************/

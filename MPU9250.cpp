@@ -508,13 +508,12 @@ float MPU9250::getRate() {
   return 1000.0f / (srd_ + 1);
 }
 bool MPU9250::setupInterrupt() {
-  /* Set up interrupt */
-  if (int_pin_ != -1 && !enableDrdyInt()) {
-    log(errorFmt, status_ = 21);
-    return false;
-  }
   if (!IMUBase::setupInterrupt(int_pin_)) {
     log(errorFmt, status_ = 22);
+    return false;
+  }
+  if (int_pin_ != -1 && !enableDrdyInt()) {
+    log(errorFmt, status_ = 21);
     return false;
   }
   return true;
