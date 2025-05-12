@@ -103,7 +103,8 @@ private:
 
 	bool setupInterruptPin(uint8_t pin) {
 		interruptSemaphore = xSemaphoreCreateBinary();
-		attachInterruptArg(pin, IMUBase::interruptHandler, interruptSemaphore, FALLING);
+		pinMode(pin, INPUT_PULLUP);
+		attachInterruptArg(digitalPinToInterrupt(pin), IMUBase::interruptHandler, interruptSemaphore, FALLING);
 		usingInterrupt = true;
 		return true;
 	}
