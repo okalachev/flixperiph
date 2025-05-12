@@ -274,6 +274,10 @@ bool ICM20948::setupInterrupt() {
 /************* Results *************/
 
 bool ICM20948::read() {
+	const static uint8_t RAW_DATA_0_RDY_INT = 0x01;
+	if (!readRegister8(0, ICM20948_INT_STATUS_1) & RAW_DATA_0_RDY_INT) {
+		return false;
+	}
 	readAllData(buffer);
 	return true;
 }
