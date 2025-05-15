@@ -46,15 +46,6 @@ THE SOFTWARE.
 // #define DEBUG 0  // Uncomment to enable debug output
 #endif
 
-/** Specific address constructor.
- * @param address I2C address, uses default I2C address if none is specified
- * @see MPU6050_DEFAULT_ADDRESS
- * @see MPU6050_ADDRESS_AD0_LOW
- * @see MPU6050_ADDRESS_AD0_HIGH
- */
-MPU6050_Base::MPU6050_Base(uint8_t address, void *wireObj):devAddr(address), wireObj(wireObj) {
-}
-
 /** Power on and prepare for general usage.
  * This will activate the device and take it out of sleep mode (which must be done
  * after start-up). This function also sets both the accelerometer and the gyroscope
@@ -62,7 +53,7 @@ MPU6050_Base::MPU6050_Base(uint8_t address, void *wireObj):devAddr(address), wir
  * the clock source to use the X Gyro for reference, which is slightly better than
  * the default internal clock source.
  */
-void MPU6050_Base::initialize() {
+bool MPU6050_Base::begin() {
 	setClockSource(MPU6050_CLOCK_PLL_XGYRO);
 
 	setFullScaleGyroRange(MPU6050_GYRO_FS_250);
@@ -70,6 +61,9 @@ void MPU6050_Base::initialize() {
 	setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
 
 	setSleepEnabled(false); // thanks to Jack Elston for pointing this one out!
+
+	_status = testConnection() ? 0 : 1;
+	return _status == 0;
 }
 
 /** Power on and prepare for general usage.
@@ -150,8 +144,12 @@ float MPU6050_Base::get_gyro_resolution() {
  * @return True if connection is valid, false otherwise
  */
 bool MPU6050_Base::testConnection() {
-  uint8_t deviceId = getDeviceID();
-  return (deviceId == 0x34) || (deviceId == 0xC) || (deviceId == 0x3A);
+	uint8_t deviceId = getDeviceID();
+	bool ok = (deviceId == 0x34) || (deviceId == 0xC) || (deviceId == 0x3A);
+	if (!ok) {
+		log("Incorrect device ID: 0x%02X", deviceId);
+	}
+	return ok;
 }
 
 // AUX_VDDIO register (InvenSense demo code calls this RA_*G_OFFS_TC)
@@ -199,7 +197,7 @@ void MPU6050_Base::setAuxVDDIOLevel(uint8_t level) {
  * @return Current sample rate
  * @see MPU6050_RA_SMPLRT_DIV
  */
-uint8_t MPU6050_Base::getRate() {
+uint8_t MPU6050_Base::getSrd() {
 	I2Cdev::readByte(devAddr, MPU6050_RA_SMPLRT_DIV, buffer, I2Cdev::readTimeout, wireObj);
 	return buffer[0];
 }
@@ -208,9 +206,84 @@ uint8_t MPU6050_Base::getRate() {
  * @see getRate()
  * @see MPU6050_RA_SMPLRT_DIV
  */
-void MPU6050_Base::setRate(uint8_t rate) {
-	I2Cdev::writeByte(devAddr, MPU6050_RA_SMPLRT_DIV, rate, wireObj);
+bool MPU6050_Base::setSrd(uint8_t srd) {
+	return I2Cdev::writeByte(devAddr, MPU6050_RA_SMPLRT_DIV, srd, wireObj);
 }
+
+float MPU6050_Base::getRate() {
+	uint8_t srd = getSrd();
+	return 1000.0f / (1 + srd);
+}
+
+bool MPU6050_Base::setRate(const Rate rate) {
+	switch (rate) {
+	case RATE_MIN:
+		return setSrd(255); // ~4 Hz
+	case RATE_50HZ_APPROX:
+		return setSrd(19); // 50 Hz
+	case RATE_MAX:
+	case RATE_1KHZ_APPROX:
+		return setSrd(0); // 1 kHz
+	default:
+		log("Unsupported rate setting");
+		return false;
+	}
+}
+
+bool MPU6050_Base::setAccelRange(const AccelRange range) {
+	switch (range) {
+	case ACCEL_RANGE_MIN:
+	case ACCEL_RANGE_2G:
+		return setFullScaleAccelRange(MPU6050_ACCEL_FS_2);
+	case ACCEL_RANGE_4G:
+		return setFullScaleAccelRange(MPU6050_ACCEL_FS_4);
+	case ACCEL_RANGE_8G:
+		return setFullScaleAccelRange(MPU6050_ACCEL_FS_8);
+	case ACCEL_RANGE_MAX:
+	case ACCEL_RANGE_16G:
+		return setFullScaleAccelRange(MPU6050_ACCEL_FS_16);
+	default:
+		log("Unsupported accel range: %d", range);
+		return false;
+	}
+}
+
+bool MPU6050_Base::setGyroRange(const GyroRange range) {
+	switch (range) {
+	case GYRO_RANGE_MIN:
+	case GYRO_RANGE_250DPS:
+		return setFullScaleGyroRange(MPU6050_GYRO_FS_250);
+	case GYRO_RANGE_500DPS:
+		return setFullScaleGyroRange(MPU6050_GYRO_FS_500);
+	case GYRO_RANGE_1000DPS:
+		return setFullScaleGyroRange(MPU6050_GYRO_FS_1000);
+	case GYRO_RANGE_MAX:
+	case GYRO_RANGE_2000DPS:
+		return setFullScaleGyroRange(MPU6050_GYRO_FS_2000);
+	default:
+		log("Unsupported gyro range: %d", range);
+		return false;
+	}
+};
+
+bool MPU6050_Base::setDLPF(const DLPF dlpf) {
+	switch (dlpf) {
+	case DLPF_MAX:
+	case DLPF_OFF:
+		return setDLPFMode(MPU6050_DLPF_BW_256);
+	case DLPF_100HZ_APPROX:
+		return setDLPFMode(MPU6050_DLPF_BW_98);
+	case DLPF_50HZ_APPROX:
+		return setDLPFMode(MPU6050_DLPF_BW_42);
+	case DLPF_5HZ_APPROX:
+		return setDLPFMode(MPU6050_DLPF_BW_10);
+	case DLPF_MIN:
+		return setDLPFMode(MPU6050_DLPF_BW_5);
+	default:
+		log("Unsupported DLPF setting");
+		return false;
+	}
+};
 
 // CONFIG register
 
@@ -293,8 +366,8 @@ uint8_t MPU6050_Base::getDLPFMode() {
  * @see MPU6050_CFG_DLPF_CFG_BIT
  * @see MPU6050_CFG_DLPF_CFG_LENGTH
  */
-void MPU6050_Base::setDLPFMode(uint8_t mode) {
-	I2Cdev::writeBits(devAddr, MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH, mode, wireObj);
+bool MPU6050_Base::setDLPFMode(uint8_t mode) {
+	return I2Cdev::writeBits(devAddr, MPU6050_RA_CONFIG, MPU6050_CFG_DLPF_CFG_BIT, MPU6050_CFG_DLPF_CFG_LENGTH, mode, wireObj);
 }
 
 // GYRO_CONFIG register
@@ -328,8 +401,7 @@ uint8_t MPU6050_Base::getFullScaleGyroRange() {
  * @see MPU6050_GCONFIG_FS_SEL_BIT
  * @see MPU6050_GCONFIG_FS_SEL_LENGTH
  */
-void MPU6050_Base::setFullScaleGyroRange(uint8_t range) {
-	
+bool MPU6050_Base::setFullScaleGyroRange(uint8_t range) {
 	switch(range) {
 		case MPU6050_GYRO_FS_250:
 			gyroscopeResolution = 250.0 / 16384.0;
@@ -350,7 +422,7 @@ void MPU6050_Base::setFullScaleGyroRange(uint8_t range) {
 		break;
 	}
 	
-	I2Cdev::writeBits(devAddr, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range, wireObj);
+	return I2Cdev::writeBits(devAddr, MPU6050_RA_GYRO_CONFIG, MPU6050_GCONFIG_FS_SEL_BIT, MPU6050_GCONFIG_FS_SEL_LENGTH, range, wireObj);
 }
 
 // SELF TEST FACTORY TRIM VALUES
@@ -483,7 +555,7 @@ uint8_t MPU6050_Base::getFullScaleAccelRange() {
  * @param range New full-scale accelerometer range setting
  * @see getFullScaleAccelRange()
  */
-void MPU6050_Base::setFullScaleAccelRange(uint8_t range) {
+bool MPU6050_Base::setFullScaleAccelRange(uint8_t range) {
 	
 	switch(range) {
 		case MPU6050_ACCEL_FS_2:
@@ -505,7 +577,7 @@ void MPU6050_Base::setFullScaleAccelRange(uint8_t range) {
 		break;
 	}
 	
-	I2Cdev::writeBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range, wireObj);
+	return I2Cdev::writeBits(devAddr, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACONFIG_AFS_SEL_BIT, MPU6050_ACONFIG_AFS_SEL_LENGTH, range, wireObj);
 }
 /** Get the high-pass filter configuration.
  * The DHPF is a filter module in the path leading to motion detectors (Free
@@ -1900,7 +1972,6 @@ void MPU6050_Base::getMotion9(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx
 	(void)mz; // unused parameter
 	
 	getMotion6(ax, ay, az, gx, gy, gz);
-	// TODO: magnetometer integration
 }
 /** Get raw 6-axis motion sensor readings (accel/gyro).
  * Retrieves all currently available motion sensor values.
@@ -1991,6 +2062,36 @@ int16_t MPU6050_Base::getAccelerationY() {
 int16_t MPU6050_Base::getAccelerationZ() {
 	I2Cdev::readBytes(devAddr, MPU6050_RA_ACCEL_ZOUT_H, 2, buffer, I2Cdev::readTimeout, wireObj);
 	return (((int16_t)buffer[0]) << 8) | buffer[1];
+}
+
+bool MPU6050_Base::read() {
+	I2Cdev::readBytes(devAddr, MPU6050_RA_ACCEL_XOUT_H, 14, buffer, I2Cdev::readTimeout, wireObj);
+	return true; // TODO:
+}
+
+void MPU6050_Base::getAccel(float& x, float& y, float& z) const {
+	static float G = 9.80665f;
+
+	int16_t ax = (((int16_t)buffer[0]) << 8) | buffer[1];
+	int16_t ay = (((int16_t)buffer[2]) << 8) | buffer[3];
+	int16_t az = (((int16_t)buffer[4]) << 8) | buffer[5];
+	x = (float)ax * accelerationResolution * G;
+	y = (float)ay * accelerationResolution * G;
+	z = (float)az * accelerationResolution * G;
+}
+
+void MPU6050_Base::getGyro(float& x, float& y, float& z) const {
+	int16_t gx = (((int16_t)buffer[8]) << 8) | buffer[9];
+	int16_t gy = (((int16_t)buffer[10]) << 8) | buffer[11];
+	int16_t gz = (((int16_t)buffer[12]) << 8) | buffer[13];
+	x = radians((float)gx * gyroscopeResolution);
+	y = radians((float)gy * gyroscopeResolution);
+	z = radians((float)gz * gyroscopeResolution);
+}
+
+bool MPU6050_Base::setupInterrupt() {
+	// TODO: implement pin interrupt
+	return IMUBase::setupInterrupt();
 }
 
 // TEMP_OUT_* registers

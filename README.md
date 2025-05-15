@@ -7,6 +7,7 @@ Based on:
 * [Bolder Flight InvenSense-IMU library](https://github.com/bolderflight/invensense-imu). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 * [Bolder Flight SBUS library](https://github.com/bolderflight/sbus). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 * [ICM20948_WE Arduino library](https://github.com/wollewald/ICM20948_WE/). Original author: Wolfgang Ewald (wolfgang.ewald@wolles-elektronikkiste.de).
+* [MPU6050 Arduino Library](https://github.com/ElectronicCats/mpu6050). Author: [ElectronicCats](https://github.com/ElectronicCats).
 
 ## IMU
 

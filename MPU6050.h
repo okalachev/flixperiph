@@ -39,7 +39,7 @@ THE SOFTWARE.
 #define _MPU6050_H_
 
 #include "I2Cdev.h"
-#include "helper_3dmath.h"
+#include "IMU.h"
 
 // supporting link:  http://forum.arduino.cc/index.php?&topic=143444.msg1079517#msg1079517
 // also: http://forum.arduino.cc/index.php?&topic=141571.msg1062899#msg1062899s
@@ -451,11 +451,12 @@ enum class GYRO_FS {
 	G2000DPS
 };
 
-class MPU6050_Base {
+class MPU6050_Base : public IMUBase {
 	public:
-		MPU6050_Base(uint8_t address=MPU6050_DEFAULT_ADDRESS, void *wireObj=0);
+		MPU6050_Base(TwoWire& wire, int drdy = -1, uint8_t addr = MPU6050_DEFAULT_ADDRESS) : wireObj(&wire), devAddr(addr) {};
+		// TODO: support drdy
 
-		void initialize();
+		bool begin();
 		void initialize(ACCEL_FS accelRange, GYRO_FS gyroRange);
 
 		float get_acce_resolution();
@@ -468,18 +469,18 @@ class MPU6050_Base {
 		void setAuxVDDIOLevel(uint8_t level);
 
 		// SMPLRT_DIV register
-		uint8_t getRate();
-		void setRate(uint8_t rate);
+		uint8_t getSrd();
+		bool setSrd(uint8_t rate);
 
 		// CONFIG register
 		uint8_t getExternalFrameSync();
 		void setExternalFrameSync(uint8_t sync);
 		uint8_t getDLPFMode();
-		void setDLPFMode(uint8_t bandwidth);
+		bool setDLPFMode(uint8_t bandwidth);
 
 		// GYRO_CONFIG register
 		uint8_t getFullScaleGyroRange();
-		void setFullScaleGyroRange(uint8_t range);
+		bool setFullScaleGyroRange(uint8_t range);
 
 		// SELF_TEST registers
 		uint8_t getAccelXSelfTestFactoryTrim();
@@ -498,7 +499,7 @@ class MPU6050_Base {
 		bool getAccelZSelfTest();
 		void setAccelZSelfTest(bool enabled);
 		uint8_t getFullScaleAccelRange();
-		void setFullScaleAccelRange(uint8_t range);
+		bool setFullScaleAccelRange(uint8_t range);
 		uint8_t getDHPFMode();
 		void setDHPFMode(uint8_t mode);
 
@@ -648,6 +649,24 @@ class MPU6050_Base {
 		int16_t getAccelerationX();
 		int16_t getAccelerationY();
 		int16_t getAccelerationZ();
+
+		// FlixPeriph interface implementation
+		bool read() override;
+		void getAccel(float& x, float& y, float& z) const override;
+		void getGyro(float& x, float& y, float& z) const override;
+		void getMag(float& x, float& y, float& z) const override {}; // doesn't have magnetometer
+		float getTemp() const override { return NAN; } // TODO: getTemperature() / 340.0 + 36.53
+
+		const char* getModel() const override { return "MPU6050"; }
+		uint8_t whoAmI() override { return getDeviceID(); }
+		int status() const override { return _status; }
+		bool setupInterrupt() override;
+
+		bool setRate(const Rate rate) override;
+		float getRate() override;
+		bool setAccelRange(const AccelRange range) override;
+		bool setGyroRange(const GyroRange range) override;
+		bool setDLPF(const DLPF dlpf) override;
 
 		// TEMP_OUT_* registers
 		int16_t getTemperature();
@@ -858,6 +877,7 @@ class MPU6050_Base {
 		void *wireObj;
 		uint8_t buffer[14];
 		uint32_t fifoTimeout = MPU6050_FIFO_DEFAULT_TIMEOUT;
+		int _status;
 
 		float accelerationResolution;
 		float gyroscopeResolution;
