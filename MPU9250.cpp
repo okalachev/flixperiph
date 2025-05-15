@@ -247,6 +247,7 @@ bool MPU9250::setGyroRange(const GyroRange range) {
       requested_gyro_range_ = 0x10;
       requested_gyro_scale_ = 1000.0f / 32767.5f;
       break;
+    case GYRO_RANGE_MAX:
     case GYRO_RANGE_2000DPS:
       requested_gyro_range_ = 0x18;
       requested_gyro_scale_ = 2000.0f / 32767.5f;

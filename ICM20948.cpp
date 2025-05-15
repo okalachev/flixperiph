@@ -85,6 +85,7 @@ bool ICM20948::setAccelRange(const AccelRange range) {
 		case ACCEL_RANGE_8G:
 			accRange = ICM20948_ACC_RANGE_8G;
 			break;
+		case ACCEL_RANGE_MAX:
 		case ACCEL_RANGE_16G:
 			accRange = ICM20948_ACC_RANGE_16G;
 			break;
@@ -141,6 +142,7 @@ bool ICM20948::setGyroRange(const GyroRange range) {
 		case GYRO_RANGE_1000DPS:
 			gyroRange = ICM20948_GYRO_RANGE_1000;
 			break;
+		case GYRO_RANGE_MAX:
 		case GYRO_RANGE_2000DPS:
 			gyroRange = ICM20948_GYRO_RANGE_2000;
 			break;
