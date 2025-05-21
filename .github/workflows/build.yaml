@@ -29,6 +29,8 @@ jobs:
       run: cd examples/MPU9250 && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build MPU9250 example for ESP32 D1 Mini
       run: cd examples/MPU9250 && arduino-cli compile --fqbn esp32:esp32:d1_mini32
+    - name: Build MPU9250 example for ESP32-S3
+      run: cd examples/MPU9250 && arduino-cli compile --fqbn esp32:esp32:esp32s3
     - name: Build MPU9250 example for ESP8266
       run: cd examples/MPU9250 && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
     - name: Build MPU9250 example for Arduino Nano
@@ -37,6 +39,8 @@ jobs:
       run: cd examples/ICM20948 && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build ICM20948 example for ESP32 D1 Mini
       run: cd examples/ICM20948 && arduino-cli compile --fqbn esp32:esp32:d1_mini32
+    - name: Build ICM20948 example for ESP32-S3
+      run: cd examples/ICM20948 && arduino-cli compile --fqbn esp32:esp32:esp32s3
     - name: Build ICM20948 example for ESP8266
       run: cd examples/ICM20948 && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
     - name: Build ICM20948 example for Arduino Nano
@@ -45,3 +49,5 @@ jobs:
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build SBUS example for ESP32 D1 Mini
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:d1_mini32
+    - name: Build SBUS example for ESP32-S3
+      run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:esp32s3
