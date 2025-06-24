@@ -21,5 +21,6 @@ void loop() {
   // Print data for Serial Plotter:
   Serial.print("gx:"); Serial.print(gx); Serial.print(" gy:"); Serial.print(gy); Serial.print(" gz:"); Serial.print(gz);
   Serial.print(" ax:"); Serial.print(ax); Serial.print(" ay:"); Serial.print(ay); Serial.print(" az:"); Serial.print(az);
+  Serial.println();
   delay(50); // slow down the output
 }
