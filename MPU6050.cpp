@@ -54,6 +54,11 @@ THE SOFTWARE.
  * the default internal clock source.
  */
 bool MPU6050_Base::begin() {
+	// Initialize I2C
+	TwoWire *wire = (TwoWire *)wireObj;
+	wire->begin();
+	wire->setClock(400000);
+
 	setClockSource(MPU6050_CLOCK_PLL_XGYRO);
 
 	setFullScaleGyroRange(MPU6050_GYRO_FS_250);
