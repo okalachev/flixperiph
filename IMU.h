@@ -53,7 +53,7 @@ public:
 	virtual void getAccel(float& x, float& y, float& z) const = 0;
 	virtual void getGyro(float& x, float& y, float& z) const = 0;
 	virtual void getMag(float& x, float& y, float& z) const = 0;
-	virtual float getTemp() const = 0;
+	virtual float getTemp() = 0;
 	virtual bool setRate(const Rate rate) = 0;
 	virtual float getRate() = 0;
 	virtual bool setAccelRange(const AccelRange range) = 0;

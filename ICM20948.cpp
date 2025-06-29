@@ -304,7 +304,7 @@ void ICM20948::getAccel(float& x, float& y, float& z) const {
 	z = z * G;
 }
 
-float ICM20948::getTemp() const {
+float ICM20948::getTemp() {
 	int16_t rawTemp = static_cast<int16_t>(((buffer[12]) << 8) | buffer[13]);
 	float tmp = (rawTemp*1.0 - ICM20948_ROOM_TEMP_OFFSET)/ICM20948_T_SENSITIVITY + 21.0;
 	return tmp;

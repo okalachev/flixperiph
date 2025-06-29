@@ -101,7 +101,7 @@ class MPU9250 : public IMUBase {
   bool setupInterrupt() override;
   inline bool new_imu_data() const {return new_imu_data_;}
   inline bool new_mag_data() const {return new_mag_data_;}
-  inline float getTemp() const override {return temp_;}
+  inline float getTemp() override {return temp_;}
   inline uint8_t whoAmI() override {return who_am_i_;}
   inline int status() const override {return status_;}
 
