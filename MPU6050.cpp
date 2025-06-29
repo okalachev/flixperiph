@@ -74,7 +74,7 @@ bool MPU6050_Base::begin() {
 /** Power on and prepare for general usage.
  * This will activate the device and take it out of sleep mode (which must be done
  * after start-up). This function also sets both the accelerometer and the gyroscope
- * to selected settings based on user perference. selection can be one of ,
+ * to selected settings based on user preference. selection can be one of ,
  * 
  * Accelerometer: ACCEL_FS::A2G, ACCEL_FS::A4G, ACCEL_FS::A8G, ACCEL_FS::A16G, 
  * Gyroscope: GYRO_FS::G250DPS, GYRO_FS::G500DPS, GYRO_FS::G1000DPS, GYRO_FS::G2000DPS, 
@@ -132,7 +132,7 @@ void MPU6050_Base::initialize(ACCEL_FS accelRange, GYRO_FS gyroRange) {
 	setSleepEnabled(false); // thanks to Jack Elston for pointing this one out!
 }
 
-/** Get the accelration resolution.
+/** Get the acceleration resolution.
  */
 float MPU6050_Base::get_acce_resolution() {
 	return accelerationResolution;
