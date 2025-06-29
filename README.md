@@ -7,7 +7,7 @@ Based on:
 * [Bolder Flight InvenSense-IMU library](https://github.com/bolderflight/invensense-imu). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 * [Bolder Flight SBUS library](https://github.com/bolderflight/sbus). Original author: Brian Taylor (brian.taylor@bolderflight.com).
 * [ICM20948_WE Arduino library](https://github.com/wollewald/ICM20948_WE/). Original author: Wolfgang Ewald (wolfgang.ewald@wolles-elektronikkiste.de).
-* [MPU6050 Arduino Library](https://github.com/ElectronicCats/mpu6050). Author: [ElectronicCats](https://github.com/ElectronicCats).
+* [MPU6050 Arduino Library](https://github.com/ElectronicCats/mpu6050). Original author: [ElectronicCats](https://github.com/ElectronicCats).
 
 ## IMU
 
@@ -66,14 +66,22 @@ void setup() {
 }
 ```
 
-### ICM-20948
+### ICM-20948, MPU-6050
 
-The ICM-20948 IMU driver has the same interface. Only the declaration is changed in the example above:
+The ICM-20948 and MPU-6050 drivers have the same interface. You should only change the declaration to use them:
 
 ```cpp
 #include <ICM20948.h>
 
 ICM20948 IMU(SPI);
+```
+
+Note, that MPU-6050 supports only I²C connection:
+
+```cpp
+#include <MPU6050.h>
+
+MPU6050 IMU(Wire);
 ```
 
 ### IMU axes orientation
@@ -86,7 +94,7 @@ Orientation of the IMU axes (including magnetometer) on various boards:
 
 ### Connection
 
-Connecting GY-91 board to ESP32 using VSPI:
+Connecting GY-91 (MPU-9250) board to ESP32 using VSPI:
 
 * 3V3 → 3V3
 * GND → GND
@@ -112,6 +120,13 @@ Connecting ICM-20948 board to ESP32 using VSPI:
 * SDA (MOSI) → IO23
 * NCS → IO5
 * AD0 (MISO) → IO19
+
+Connecting GY-521 (MPU-6050) board to ESP32 using I²C:
+
+* VCC → 3V3
+* GND → GND
+* SCL → IO22
+* SDA → IO21
 
 ### Logging
 
