@@ -151,6 +151,7 @@ float MPU6050_Base::get_gyro_resolution() {
 bool MPU6050_Base::testConnection() {
 	uint8_t deviceId = getDeviceID();
 	bool ok = (deviceId == 0x34) || (deviceId == 0xC) || (deviceId == 0x3A);
+	// https://github.com/jrowberg/i2cdevlib/issues/594#issuecomment-2332911242
 	if (!ok) {
 		log("Incorrect device ID: 0x%02X", deviceId);
 	}
