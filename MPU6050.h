@@ -655,7 +655,7 @@ class MPU6050_Base : public IMUBase {
 		void getAccel(float& x, float& y, float& z) const override;
 		void getGyro(float& x, float& y, float& z) const override;
 		void getMag(float& x, float& y, float& z) const override {}; // doesn't have magnetometer
-		float getTemp() const override { return NAN; } // TODO: getTemperature() / 340.0 + 36.53
+		float getTemp() override { return getTemperature() / 340.0 + 36.53; };
 
 		const char* getModel() const override { return "MPU6050"; }
 		uint8_t whoAmI() override { return getDeviceID(); }

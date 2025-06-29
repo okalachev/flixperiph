@@ -241,7 +241,7 @@ public:
 	/* Results */
 	bool read() override;
 	void getAccel(float& x, float& y, float& z) const override;
-	float getTemp() const override;
+	float getTemp() override;
 	void getGyro(float& x, float& y, float& z) const override;
 	void getMag(float& x, float& y, float& z) const override;
 
