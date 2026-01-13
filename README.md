@@ -16,21 +16,21 @@ Based on:
 Example for SPI-connected IMU:
 
 ```cpp
-#include <MPU9250.h>
+#include <FlixPeriph.h>
 #include <SPI.h>
 
-MPU9250 IMU(SPI); // no need to specify CS pin, the default pin is used automatically
+MPU9250 imu(SPI); // no need to specify CS pin, the default pin is used automatically
 
 void setup() {
-  IMU.begin();
+  imu.begin();
 }
 
 void loop() {
   float gx, gy, gz, ax, ay, az, mx, my, mz;
-  IMU.waitForData(); // blockingly read the data, use IMU.read() for non-blocking read
-  IMU.getGyro(gx, gy, gz);
-  IMU.getAccel(ax, ay, az);
-  IMU.getMag(mx, my, mz);
+  imu.waitForData(); // blockingly read the data, use imu.read() for non-blocking read
+  imu.getGyro(gx, gy, gz);
+  imu.getAccel(ax, ay, az);
+  imu.getMag(mx, my, mz);
   // Process the data...
 }
 ```
@@ -38,7 +38,7 @@ void loop() {
 The library will detect IMU type (MPU-9250 or MPU-6500) automatically. You can use the `whoAmI()` method to check the IMU type:
 
 ```cpp
-if (IMU.whoAmI() == IMU.WHOAMI_MPU6500) {
+if (imu.whoAmI() == imu.WHOAMI_MPU6500) {
   // MPU6500 detected
 } else {
   // MPU9250 detected
@@ -54,15 +54,15 @@ You can also use `<MPU6500.h>` header and `MPU6500` class, which is an alias for
 In case of using I²C connection (not recommended), the initialization would look like this:
 
 ```cpp
-#include <MPU9250.h>
+#include <FlixPeriph.h>
 #include <Wire.h>
 
-MPU9250 IMU(Wire); // the default address is used automatically
+MPU9250 imu(Wire); // the default address is used automatically
 
 void setup() {
   Wire.begin();
   Wire.setClock(400000); // 400 kHz I²C clock
-  IMU.begin();
+  imu.begin();
 }
 ```
 
@@ -71,17 +71,17 @@ void setup() {
 The ICM-20948 and MPU-6050 drivers have the same interface. You should only change the declaration to use them:
 
 ```cpp
-#include <ICM20948.h>
+#include <FlixPeriph.h>
 
-ICM20948 IMU(SPI);
+ICM20948 imu(SPI);
 ```
 
 Note, that MPU-6050 supports only I²C connection:
 
 ```cpp
-#include <MPU6050.h>
+#include <FlixPeriph.h>
 
-MPU6050 IMU(Wire);
+MPU6050 imu(Wire);
 ```
 
 ### IMU axes orientation
@@ -139,13 +139,13 @@ Serial2.setDebugOutput(true); // all the debug output will now be sent to Serial
 On platforms other than ESP32, the default output port is *Serial*. On all platforms the debug output can be changed using `setLogOutput` method:
 
 ```cpp
-IMU.setLogOutput(Serial2);
+imu.setLogOutput(Serial2);
 ```
 
 The debug output can be disabled using `setVerbosity` method:
 
 ```cpp
-IMU.setVerbosity(false); // disable debug output
+imu.setVerbosity(false); // disable debug output
 ```
 
 ## SBUS
@@ -153,18 +153,18 @@ IMU.setVerbosity(false); // disable debug output
 Example for SBUS receiver, connected to Serial2:
 
 ```cpp
-#include <SBUS.h>
+#include <FlixPeriph.h>
 
-SBUS RC(Serial2, true); // Using Serial2, software inversion enabled
+SBUS rc(Serial2, true); // Using Serial2, software inversion enabled
 
 void setup() {
   Serial.begin(115200);
-  RC.begin();
+  rc.begin();
 }
 
 void loop() {
-  if (!RC.read()) return;
-  SBUSData data = RC.data();
+  if (!rc.read()) return;
+  SBUSData data = rc.data();
   for (int i = 0; i < data.NUM_CH; i++) {
     Serial.print(data.ch[i]);
     Serial.print(" ");
