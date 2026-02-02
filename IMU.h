@@ -67,6 +67,7 @@ public:
 class IMUBase : public IMUInterface, public Logger {
 private:
 	bool usingInterrupt = false;
+	int interruptPin = -1;
 
 #ifdef ESP32
 	SemaphoreHandle_t interruptSemaphore;
@@ -106,6 +107,7 @@ private:
 		pinMode(pin, INPUT_PULLUP);
 		attachInterruptArg(digitalPinToInterrupt(pin), IMUBase::interruptHandler, interruptSemaphore, FALLING);
 		usingInterrupt = true;
+		interruptPin = pin;
 		return true;
 	}
 #else
@@ -126,7 +128,7 @@ protected:
 
 public:
 	void waitForData() override {
-		if (this->status()) return; // don't wait if there's an error
+		if (this->status() && interruptPin != -1) return; // don't hang if error and interrupt pin is used
 
 		if (usingInterrupt) {
 #ifdef ESP32
