@@ -40,6 +40,7 @@ bool ICM20948::begin() {
 			break;
 		}
 		if (attempt++ > 10) {
+			_status = 1;
 			log("incorrect WHO_AM_I value: 0x%02X", whoami);
 			return false;
 		}
