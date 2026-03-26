@@ -49,6 +49,7 @@ class SBUS {
 	#endif
 	explicit SBUS(HardwareSerial& bus, const bool inv = true, const bool fast = false) : uart_(&bus), inv_(inv), fast_(fast) {}
 	void begin();
+	void begin(int rxpin, int txpin = -1, bool inv = true, bool fast = false);
 	bool read();
 	inline SBUSData data() const {return data_;}
 
@@ -57,9 +58,7 @@ class SBUS {
 	HardwareSerial *uart_;
 	bool inv_ = true;
 	bool fast_ = false;
-	#if defined(ESP32)
 	int8_t rxpin_ = -1, txpin_ = -1; // if pin < 0, default for the bus is used
-	#endif
 	int32_t baud_ = 100000;
 	/* Message len */
 	static constexpr int8_t PAYLOAD_LEN_ = 23;
@@ -93,6 +92,7 @@ class SBUSTx {
 	#endif
 	explicit SBUSTx(HardwareSerial& bus, const bool inv = true, const bool fast = false) : uart_(&bus), inv_(inv), fast_(fast) {}
 	void begin();
+	void begin(int txpin, int rxpin = -1, bool inv = true, bool fast = false);
 	void write();
 	inline void data(const SBUSData &data) {data_ = data;}
 	inline SBUSData data() const {return data_;}
@@ -102,9 +102,7 @@ class SBUSTx {
 	HardwareSerial *uart_;
 	bool inv_ = true;
 	bool fast_ = false;
-	#if defined(ESP32)
 	int8_t rxpin_ = -1, txpin_ = -1; // if pin < 0, default for the bus is used
-	#endif
 	int32_t baud_ = 100000;
 	/* Message len */
 	static constexpr int8_t BUF_LEN_ = 25;

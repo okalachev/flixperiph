@@ -78,6 +78,14 @@ void SBUS::begin() {
 	uart_->flush();
 }
 
+void SBUS::begin(int rxpin, int txpin, bool inv, bool fast) {
+	rxpin_ = rxpin;
+	txpin_ = txpin;
+	inv_ = inv;
+	fast_ = fast;
+	begin();
+}
+
 bool SBUS::read() {
 	/* Read through all available packets to get the newest */
 	new_data_ = false;
@@ -205,6 +213,14 @@ void SBUSTx::begin() {
 	#else
 	uart_->begin(baud_, SERIAL_8E2);
 	#endif
+}
+
+void SBUSTx::begin(int txpin, int rxpin, bool inv, bool fast) {
+	txpin_ = txpin;
+	rxpin_ = rxpin;
+	inv_ = inv;
+	fast_ = fast;
+	begin();
 }
 
 void SBUSTx::write() {
