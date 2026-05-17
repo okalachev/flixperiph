@@ -875,9 +875,9 @@ class MPU6050_Base : public IMUBase {
 	protected:
 		uint8_t devAddr;
 		void *wireObj;
-		uint8_t buffer[14];
+		uint8_t buffer[14] = {};
 		uint32_t fifoTimeout = MPU6050_FIFO_DEFAULT_TIMEOUT;
-		int _status;
+		int _status = 0;
 
 		float accelerationResolution;
 		float gyroscopeResolution;

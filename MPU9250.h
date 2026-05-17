@@ -122,11 +122,11 @@ class MPU9250 : public IMUBase {
   DlpfBandwidth dlpf_bandwidth_, requested_dlpf_;
   float accel_scale_, requested_accel_scale_;
   float gyro_scale_, requested_gyro_scale_;
-  uint8_t srd_;
+  uint8_t srd_ = 0;
   static constexpr float TEMP_SCALE_ = 333.87f;
   uint8_t asa_buff_[3];
   float mag_scale_[3];
-  uint8_t who_am_i_, who_am_i_ak8963_;
+  uint8_t who_am_i_ = 0, who_am_i_ak8963_ = 0;
   /* Data */
   static constexpr float G_MPS2_ = 9.80665f;
   static constexpr float DEG2RAD_ = 3.14159265358979323846264338327950288f /
@@ -139,8 +139,8 @@ class MPU9250 : public IMUBase {
   uint8_t mag_data_[8];
   uint8_t data_buf_[23];
   int16_t accel_cnts_[3], gyro_cnts_[3], temp_cnts_, mag_cnts_[3];
-  float accel_[3], gyro_[3], mag_[3];
-  float temp_;
+  float accel_[3] = {}, gyro_[3] = {}, mag_[3] = {};
+  float temp_ = 0.0f;
   /* Registers */
   static constexpr uint8_t PWR_MGMNT_1_ = 0x6B;
   static constexpr uint8_t H_RESET_ = 0x80;

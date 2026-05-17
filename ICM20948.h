@@ -285,12 +285,12 @@ protected:
 	SPISettings mySPISettings;
 	uint8_t i2cAddress;
 	uint8_t currentBank;
-	uint8_t buffer[20];
+	uint8_t buffer[20] = {};
 	uint8_t accRangeFactor;
 	uint8_t gyrRangeFactor;
 	uint8_t regVal; // intermediate storage of register values
 	ICM20948_fifoType fifoType;
-	int _status;
+	int _status = 0;
 	int csPin;
 	int intPin;
 	bool useSPI;
