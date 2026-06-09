@@ -9,9 +9,10 @@ void setup() {
 
 void loop() {
   if (!rc.read()) return;
-  SBUSData data = rc.data();
-  for (int i = 0; i < data.NUM_CH; i++) {
-    Serial.print(data.ch[i]);
+  uint16_t channels[16];
+  rc.getChannels(channels);
+  for (int i = 0; i < 16; i++) {
+    Serial.print(channels[i]);
     Serial.print(" ");
   }
   Serial.println();

@@ -52,6 +52,8 @@ class SBUS {
 	void begin(int rxpin, int txpin = -1, bool inv = true, bool fast = false);
 	bool read();
 	inline SBUSData data() const {return data_;}
+	void getChannels(uint16_t (&ch)[SBUSData::NUM_CH]) const;
+	bool isFailsafe() const { return data_.failsafe; }
 
  private:
 	/* Communication */

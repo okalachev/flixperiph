@@ -97,6 +97,12 @@ bool SBUS::read() {
 	return new_data_;
 }
 
+void SBUS::getChannels(uint16_t (&ch)[SBUSData::NUM_CH]) const {
+	for (int i = 0; i < SBUSData::NUM_CH; i++) {
+		ch[i] = data_.ch[i];
+	}
+}
+
 bool SBUS::Parse() {
 	/* Parse messages */
 	while (uart_->available()) {
