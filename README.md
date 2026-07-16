@@ -66,14 +66,16 @@ void setup() {
 }
 ```
 
-### ICM-20948, MPU-6050
+### ICM-20948, MPU-6050, ICM-40609-D
 
-The ICM-20948 and MPU-6050 drivers have the same interface. You should only change the declaration to use them:
+The ICM-20948, MPU-6050, and ICM-40609-D drivers have the same interface. You should only change the declaration to use them:
 
 ```cpp
 #include <FlixPeriph.h>
 
 ICM20948 imu(SPI);
+// or
+// ICM40609D imu(SPI);
 ```
 
 Note, that MPU-6050 supports only I²C connection:

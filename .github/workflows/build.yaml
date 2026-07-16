@@ -53,6 +53,10 @@ jobs:
       run: cd examples/MPU6050 && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
     - name: Build MPU6050 example for Arduino Nano
       run: cd examples/MPU6050 && arduino-cli compile --fqbn arduino:avr:nano
+    - name: Build ICM-40609-D example for ESP32
+      run: cd examples/ICM40609D && arduino-cli compile --fqbn esp32:esp32:esp32
+    - name: Build ICM-40609-D example for ESP32-S3
+      run: cd examples/ICM40609D && arduino-cli compile --fqbn esp32:esp32:esp32s3
     - name: Build SBUS example for ESP32
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build SBUS example for ESP32 D1 Mini

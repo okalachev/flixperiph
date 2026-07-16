@@ -2,4 +2,5 @@
 #include "MPU6500.h"
 #include "MPU6050.h"
 #include "ICM20948.h"
+#include "ICM40609D.h"
 #include "SBUS.h"
