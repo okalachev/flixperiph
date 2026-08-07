@@ -54,6 +54,9 @@ void InvensenseImu::Begin() {
     delay(1);
     digitalWrite(dev_, HIGH);
     delay(1);
+  } else {
+    i2c_->setClock(400000);
+    i2c_->begin();
   }
 }
 

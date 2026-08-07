@@ -12,7 +12,7 @@
 #include "IMU.h"
 #include "logger.h"
 
-class ICM40609D : public IMUBase {
+class ICM40609D : public IMU {
 public:
 	static constexpr uint8_t WHO_AM_I_VALUE = 0x3B;
 
@@ -33,7 +33,6 @@ public:
 	int status() const override { return _status; }
 	uint8_t whoAmI() override;
 	bool read() override;
-	void waitForData() override { IMUBase::waitForData(); }
 	void getAccel(float& x, float& y, float& z) const override;
 	void getGyro(float& x, float& y, float& z) const override;
 	void getMag(float& x, float& y, float& z) const override;

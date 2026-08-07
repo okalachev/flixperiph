@@ -268,7 +268,7 @@ float ICM20948::getRate() {
 }
 
 bool ICM20948::setupInterrupt() {
-	bool res = IMUBase::setupInterrupt(intPin);
+	bool res = IMU::setupInterrupt(intPin);
 	if (intPin != -1 && res) {
 		setIntPinPolarity(ICM20948_ACT_LOW);
 		enableClearIntByAnyRead(true);

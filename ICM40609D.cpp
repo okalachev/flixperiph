@@ -282,7 +282,7 @@ float ICM40609D::getRate() {
 }
 
 bool ICM40609D::setupInterrupt() {
-	bool res = IMUBase::setupInterrupt(intPin);
+	bool res = IMU::setupInterrupt(intPin);
 	if (intPin != -1 && res) {
 		enableDataReadyInterrupt();
 	}

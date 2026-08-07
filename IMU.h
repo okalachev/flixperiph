@@ -10,8 +10,8 @@
 #include "freertos/task.h"
 #endif
 
-// IMU driver interface
-class IMUInterface {
+// Base class for IMU drivers
+class IMU : public Logger {
 public:
 	enum DLPF {
 		DLPF_OFF,
@@ -44,27 +44,30 @@ public:
 		RATE_8KHZ_APPROX,
 		RATE_MAX
 	};
-	virtual bool begin() = 0;
-	virtual void reset() = 0;
-	virtual int status() const = 0; // 0 - success, otherwise error
-	virtual uint8_t whoAmI() = 0;
-	virtual bool read() = 0;
-	virtual void waitForData() = 0;
-	virtual void getAccel(float& x, float& y, float& z) const = 0;
-	virtual void getGyro(float& x, float& y, float& z) const = 0;
-	virtual void getMag(float& x, float& y, float& z) const = 0;
-	virtual float getTemp() = 0;
-	virtual bool setRate(const Rate rate) = 0;
-	virtual float getRate() = 0;
-	virtual bool setAccelRange(const AccelRange range) = 0;
-	virtual bool setGyroRange(const GyroRange range) = 0;
-	virtual bool setDLPF(const DLPF dlpf) = 0;
-	virtual const char* getModel() const = 0;
-	virtual bool setupInterrupt() = 0;
-};
 
-// Base for all IMU drivers
-class IMUBase : public IMUInterface, public Logger {
+	virtual bool begin() { return false; }
+	virtual bool begin(SPIClass& spi, int cs = -1, int drdy = -1) { return false; }
+	virtual bool begin(TwoWire& i2c, int drdy = -1) { return false; }
+	virtual void reset() {}
+	virtual int status() const { return -1; } // 0 - success, otherwise error
+	virtual uint8_t whoAmI() { return 0; }
+	virtual bool read() { return false; }
+	virtual void getAccel(float& x, float& y, float& z) const { x = y = z = NAN; }
+	virtual void getGyro(float& x, float& y, float& z) const { x = y = z = NAN; }
+	virtual void getMag(float& x, float& y, float& z) const { x = y = z = NAN; }
+	virtual float getTemp() { return NAN; }
+	virtual bool setRate(const Rate rate) { return false; }
+	virtual float getRate() { return 0; }
+	virtual bool setAccelRange(const AccelRange range) { return false; }
+	virtual bool setGyroRange(const GyroRange range) { return false; }
+	virtual bool setDLPF(const DLPF dlpf) { return false; }
+	virtual char const* getModel() const { return "None"; }
+	virtual bool setupInterrupt() { return false; }
+
+	// Fabric methods
+	static IMU *create(int model, SPIClass& spi, int cs = -1, int drdy = -1);
+	static IMU *create(int model, TwoWire& i2c, int drdy = -1);
+
 private:
 	bool usingInterrupt = false;
 	int interruptPin = -1;
@@ -96,7 +99,7 @@ private:
 			return false;
 		}
 
-		timerAttachInterruptArg(timer, IMUBase::interruptHandler, interruptSemaphore);
+		timerAttachInterruptArg(timer, interruptHandler, interruptSemaphore);
 		timerAlarm(timer, alarmValue, true, 0);
 		usingInterrupt = true;
 		return true;
@@ -105,7 +108,7 @@ private:
 	bool setupInterruptPin(uint8_t pin) {
 		interruptSemaphore = xSemaphoreCreateBinary();
 		pinMode(pin, INPUT_PULLUP);
-		attachInterruptArg(digitalPinToInterrupt(pin), IMUBase::interruptHandler, interruptSemaphore, FALLING);
+		attachInterruptArg(digitalPinToInterrupt(pin), interruptHandler, interruptSemaphore, FALLING);
 		usingInterrupt = true;
 		interruptPin = pin;
 		return true;
@@ -116,7 +119,7 @@ private:
 #endif
 
 protected:
-	bool setupInterrupt(int pin = -1) {
+	bool setupInterrupt(int pin) {
 		if (usingInterrupt) return true; // already set
 
 		if (pin == -1) {
@@ -127,7 +130,7 @@ protected:
 	}
 
 public:
-	void waitForData() override {
+	virtual void waitForData() {
 		if (this->status() && interruptPin != -1) return; // don't hang if error and interrupt pin is used
 
 		if (usingInterrupt) {

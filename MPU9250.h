@@ -39,7 +39,7 @@
 #include "invensense_imu.h"  // NOLINT
 #include "logger.h"
 
-class MPU9250 : public IMUBase {
+class MPU9250 : public IMU {
  public:
   /* Sensor and filter settings */
   enum I2cAddr : uint8_t {
