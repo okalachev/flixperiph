@@ -57,12 +57,12 @@ public:
 	virtual void getMag(float& x, float& y, float& z) const { x = y = z = NAN; }
 	virtual float getTemp() { return NAN; }
 	virtual bool setRate(const Rate rate) { return false; }
-	virtual float getRate() { return 0; }
+	virtual float getRate() { return 1000; }
 	virtual bool setAccelRange(const AccelRange range) { return false; }
 	virtual bool setGyroRange(const GyroRange range) { return false; }
 	virtual bool setDLPF(const DLPF dlpf) { return false; }
 	virtual char const* getModel() const { return "None"; }
-	virtual bool setupInterrupt() { return false; }
+	virtual bool setupInterrupt() { return setupInterruptTimer(); }
 
 	// Fabric methods
 	static IMU *create(int model, SPIClass& spi, int cs = -1, int drdy = -1);
