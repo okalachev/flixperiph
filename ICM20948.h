@@ -84,7 +84,7 @@ typedef enum AK09916_OP_MODE {
 	AK09916_CONT_MODE_100HZ    = 0x08
 } AK09916_opMode;
 
-class ICM20948 : public IMUBase {
+class ICM20948 : public IMU {
 public:
 	/* constants */
 

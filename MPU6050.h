@@ -451,7 +451,7 @@ enum class GYRO_FS {
 	G2000DPS
 };
 
-class MPU6050_Base : public IMUBase {
+class MPU6050_Base : public IMU {
 	public:
 		MPU6050_Base(TwoWire& wire, int drdy = -1, uint8_t addr = MPU6050_DEFAULT_ADDRESS) : wireObj(&wire), devAddr(addr) {};
 		// TODO: support drdy

@@ -2097,7 +2097,7 @@ void MPU6050_Base::getGyro(float& x, float& y, float& z) const {
 
 bool MPU6050_Base::setupInterrupt() {
 	// TODO: implement pin interrupt
-	return IMUBase::setupInterrupt();
+	return IMU::setupInterrupt();
 }
 
 // TEMP_OUT_* registers
