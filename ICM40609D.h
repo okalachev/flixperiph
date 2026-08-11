@@ -27,7 +27,7 @@ public:
 	ICM40609D(SPIClass& s, int cs = -1, int drdy = -1)
 		: _spi{&s}, csPin{cs}, intPin{drdy}, useSPI{true} {}
 
-	/* IMUInterface implementation */
+	/* IMU interface implementation */
 	bool begin() override;
 	void reset() override;
 	int status() const override { return _status; }

@@ -21,6 +21,9 @@ bool ICM40609D::begin() {
 		digitalWrite(csPin, HIGH);
 		spiSettingsCfg = SPISettings(SPI_CFG_CLOCK, MSBFIRST, SPI_MODE0);
 		spiSettingsData = SPISettings(SPI_DATA_CLOCK, MSBFIRST, SPI_MODE0);
+	} else {
+		_wire->begin();
+		_wire->setClock(400000);
 	}
 	currentBank = 0;
 
