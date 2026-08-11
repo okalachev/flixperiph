@@ -22,7 +22,7 @@ jobs:
     - name: Install AVR core
       run: arduino-cli core install arduino:avr
     - name: Install STM32 core
-      run: arduino-cli core update-index && arduino-cli core install STMicroelectronics:stm32
+      run: arduino-cli core update-index --config-file arduino-cli.yaml && arduino-cli core install STMicroelectronics:stm32 --config-file arduino-cli.yaml
     - name: Zip library
       run: cd .. && zip -r FlixPeriph.zip . -x .git/\*
     - name: Install library
