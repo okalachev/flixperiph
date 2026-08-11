@@ -21,6 +21,8 @@ jobs:
       run: arduino-cli core update-index --config-file arduino-cli.yaml && arduino-cli core install esp8266:esp8266 --config-file arduino-cli.yaml
     - name: Install AVR core
       run: arduino-cli core install arduino:avr
+    - name: Install STM32 core
+      run: arduino-cli core update-index && arduino-cli core install STMicroelectronics:stm32
     - name: Zip library
       run: cd .. && zip -r FlixPeriph.zip . -x .git/\*
     - name: Install library
@@ -35,6 +37,8 @@ jobs:
       run: cd examples/MPU9250 && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
     - name: Build MPU9250 example for Arduino Nano
       run: cd examples/MPU9250 && arduino-cli compile --fqbn arduino:avr:nano
+    - name: Build MPU9250 example for STM32
+      run: cd examples/MPU9250 && arduino-cli compile --fqbn STMicroelectronics:stm32:GenF4
     - name: Build ICM20948 example for ESP32
       run: cd examples/ICM20948 && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build ICM20948 example for ESP32 D1 Mini
@@ -45,6 +49,8 @@ jobs:
       run: cd examples/ICM20948 && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
     - name: Build ICM20948 example for Arduino Nano
       run: cd examples/ICM20948 && arduino-cli compile --fqbn arduino:avr:nano
+    - name: Build ICM20948 example for STM32
+      run: cd examples/ICM20948 && arduino-cli compile --fqbn STMicroelectronics:stm32:GenF4
     - name: Build MPU6050 example for ESP32
       run: cd examples/MPU6050 && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build MPU6050 example for ESP32 D1 Mini
@@ -53,13 +59,19 @@ jobs:
       run: cd examples/MPU6050 && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
     - name: Build MPU6050 example for Arduino Nano
       run: cd examples/MPU6050 && arduino-cli compile --fqbn arduino:avr:nano
+    - name: Build MPU6050 example for STM32
+      run: cd examples/MPU6050 && arduino-cli compile --fqbn STMicroelectronics:stm32:GenF4
     - name: Build ICM-40609-D example for ESP32
       run: cd examples/ICM40609D && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build ICM-40609-D example for ESP32-S3
       run: cd examples/ICM40609D && arduino-cli compile --fqbn esp32:esp32:esp32s3
+    - name: Build ICM-40609-D example for ESP8266
+      run: cd examples/ICM40609D && arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2
     - name: Build SBUS example for ESP32
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:esp32
     - name: Build SBUS example for ESP32 D1 Mini
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:d1_mini32
     - name: Build SBUS example for ESP32-S3
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:esp32s3
+    - name: Build SBUS example for STM32
+      run: cd examples/SBUS && arduino-cli compile --fqbn STMicroelectronics:stm32:GenF4
