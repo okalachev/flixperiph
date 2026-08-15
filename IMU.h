@@ -139,6 +139,7 @@ public:
 			this->read();
 #endif
 		} else {
+			if (!status()) return;
 			while (!this->read()); // wait using polling
 		}
 	}
