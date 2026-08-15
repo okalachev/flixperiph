@@ -27,6 +27,9 @@ bool ICM20948::begin() {
 		pinMode(csPin, OUTPUT);
 		digitalWrite(csPin, HIGH);
 		mySPISettings = SPISettings(7000000, MSBFIRST, SPI_MODE0);
+	} else {
+		_wire->begin();
+		_wire->setClock(400000);
 	}
 	currentBank = 0;
 
