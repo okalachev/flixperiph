@@ -42,7 +42,7 @@ public:
 		}
 
 		// 10 MHz: 1 tick = 100 ns
-		if (!rmtInit(pin_, RMT_TX_MODE, RMT_MEM_NUM_BLOCKS_1, 10'000'000)) {
+		if (!rmtInit(pin_, RMT_TX_MODE, RMT_MEM_NUM_BLOCKS_1, 20'000'000)) {
 			free(symbols_);
 			free(last_);
 			symbols_ = nullptr;
@@ -107,8 +107,8 @@ public:
 
 private:
 	static void encodeByte(rmt_data_t*& out, uint8_t value) {
-		const rmt_data_t bit0 = { 4, 1, 8, 0 };
-		const rmt_data_t bit1 = { 8, 1, 4, 0 };
+		const rmt_data_t bit0 = {  6, 1, 19, 0 };
+		const rmt_data_t bit1 = { 15, 1, 10, 0 };
 
 		for (uint8_t mask = 0x80; mask; mask >>= 1)
 			*out++ = (value & mask) ? bit1 : bit0;
@@ -124,8 +124,7 @@ private:
 			encodeByte(out, colors[i].b * brightness_);
 		}
 
-		// Reset/latch: 300 us LOW
-		*out = { 3000, 0, 1, 0 };
+		*out = { 6000, 0, 1, 0 };
 	}
 
 	int pin_;
