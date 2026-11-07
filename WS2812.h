@@ -102,6 +102,9 @@ public:
 	}
 
 	void setBrightness(float brightness) {
+		if (brightness_ != brightness) {
+			lastValid_ = false; // invalidate last colors when brightness changes
+		}
 		brightness_ = brightness;
 	}
 
