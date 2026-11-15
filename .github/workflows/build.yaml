@@ -63,3 +63,7 @@ jobs:
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:d1_mini32
     - name: Build SBUS example for ESP32-S3
       run: cd examples/SBUS && arduino-cli compile --fqbn esp32:esp32:esp32s3
+    - name: Build CRSF example for ESP32
+      run: cd examples/CRSF && arduino-cli compile --fqbn esp32:esp32:esp32
+    - name: Build CRSF example for ESP32-S3
+      run: cd examples/CRSF && arduino-cli compile --fqbn esp32:esp32:esp32s3

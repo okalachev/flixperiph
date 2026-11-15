@@ -4,4 +4,5 @@
 #include "ICM20948.h"
 #include "ICM40609D.h"
 #include "SBUS.h"
+#include "CRSF.h"
 #include "WS2812.h"
