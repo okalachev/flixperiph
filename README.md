@@ -184,6 +184,10 @@ Connecting SBUS receiver to ESP32:
 * GND → GND
 * SIGNAL → IO16 (RX2)
 
+## CRSF (Crossfire)
+
+See [CRSF example](examples/CRSF/CRSF.ino) on how to use a CRSF receiver/remote control with the library.
+
 ## WS2812 RGB LED
 
 See [WS2812 example](examples/WS2812/WS2812.ino) on how to control a WS2812 RGB LED strip.
